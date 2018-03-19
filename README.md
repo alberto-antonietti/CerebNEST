@@ -2,9 +2,9 @@
 
 Tested with Ubuntu 14.04 64bit, Python 2.7.6 and NEST Release 2.14.0
 
-### Installation istructions
+### Installation instructions
 
-0. Install NEST following the istructions 
+0. Install NEST following the instructions provided here (http://www.nest-simulator.org/)
 
 1. Export an Environment Variable containing the installation (build) directory of NEST. E.g.:
 ```
@@ -26,7 +26,7 @@ cd b
 cmake -Dwith-nest=${NEST_INSTALL_DIR}/bin/nest-config ..
 ```
 
-The resulting output shoud be something similar to:
+The resulting output should be something similar to:
 > [...]
 >-------------------------------------------------------
 >
@@ -54,7 +54,7 @@ The resulting output shoud be something similar to:
 export NEST_MODULE_PATH=/home/alberto/nest-simulator/b/lib/nest:$NEST_MODULE_PATH
 export SLI_PATH=/home/alberto/nest-simulator/b/share/nest/sli:$SLI_PATH
 ```
-This passage shoud be repeated every time the Terminal is closed. It is possible to add the two lines in your \.bashrc to avoid doing this every time.
+This passage should be repeated every time the Terminal is closed. It is possible to add the two lines in your \.bashrc to avoid doing this every time.
 
 6. Make and install the module
 ```
