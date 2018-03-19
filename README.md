@@ -2,7 +2,7 @@
 
 Tested with Ubuntu 14.04 64bit, Python 2.7.6 and NEST Release 2.14.0
 
-** Installation istructions **
+### Installation istructions
 
 0. Install NEST following the istructions 
 
