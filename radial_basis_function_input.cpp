@@ -63,7 +63,7 @@ mynest::radial_basis_function_input::Parameters_::get( DictionaryDatum& d ) cons
   def< double >( d, nest::names::rate, Rate_ );
   def< double >( d, nest::names::noise,Noise_ );
   def< double >( d, nest::names::mean, Mean_ );
-  def< double >( d, nest::names::sdev, SDev_ );
+  def< double >( d, mynames::sdev, SDev_ );
   def< std::string >( d, nest::names::filenames, FileDesired_ );
 }
 
@@ -74,7 +74,7 @@ mynest::radial_basis_function_input::Parameters_::set( const DictionaryDatum& d 
   updateValue< double >( d, nest::names::rate, Rate_ );
   updateValue< double >( d, nest::names::noise, Noise_ );
   updateValue< double >( d, nest::names::mean, Mean_ );
-  updateValue< double >( d, nest::names::sdev, SDev_ );
+  updateValue< double >( d, mynames::sdev, SDev_ );
   updateValue< std::string >( d, nest::names::filenames, FileDesired_ );
 }
 

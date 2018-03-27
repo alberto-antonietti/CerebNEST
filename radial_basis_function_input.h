@@ -52,6 +52,7 @@ FirstVersion: October 2017
 #include "event.h"
 #include "nest_types.h"
 #include "ring_buffer.h"
+#include "mynames.h"
 
 namespace mynest
 {

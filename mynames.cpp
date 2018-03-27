@@ -32,7 +32,7 @@ const Name num_dcn( "num_dcn" );
 const Name positive( "positive" );
 const Name protocol( "protocol" );
 const Name Tduration( "Tduration" );
-
+const Name sdev( "sdev" );
 
 }
 }

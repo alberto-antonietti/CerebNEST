@@ -45,7 +45,7 @@ extern const Name num_dcn;            //!< Number of Deep Cerebellar Nuclei
 extern const Name positive;
 extern const Name protocol;
 extern const Name Tduration; //!< US duration for Closed Loop Neuron
-
+extern const Name sdev;
 
 }
 }
