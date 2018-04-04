@@ -255,7 +255,7 @@ if RECORDING_CELLS:
 Input_generation = nest.Create("spike_generator", MF_number)
 nest.Connect(Input_generation,MF,'one_to_one',{'weight': 100.0})
 
-MFinput_file = open("/home/alberto/workspace/CerNESTbellum/MF_100Trial_EBCC.dat",'r')
+MFinput_file = open("MF_100Trial_EBCC.dat",'r')
 
 for MFi in Input_generation:
     Spikes_s = MFinput_file.readline()
