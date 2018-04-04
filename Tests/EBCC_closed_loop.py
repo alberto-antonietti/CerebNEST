@@ -39,6 +39,7 @@ nest.SetKernelStatus({'local_num_threads' : CORES,
                       'total_num_virtual_procs' : CORES,
                       'resolution' : 1.0,
                       'overwrite_files' : True})
+nest.SetNumRecProcesses(1)
 msd = 1000 # master seed
 msdrange1 = range(msd, msd+CORES )
 pyrngs = [np.random.RandomState(s) for s in msdrange1]
@@ -62,7 +63,6 @@ nest.SetDefaults('granular_neuron',{'t_ref' : 1.0,
                                     'V_th' : -40.0,
                                     'V_reset' : -70.0,
                                     'g_L' : 0.2,
-                                   #'tau_m' : 10.0,
                                     'tau_syn_ex' : 0.5,
                                     'tau_syn_in' : 10.0})
 
@@ -72,7 +72,6 @@ nest.SetDefaults('purkinje_neuron',{'t_ref' : 2.0,
                                     'V_reset' : -70.0,
                                     'g_L' : 16.0,
                                     'tau_syn_ex' : 0.5,
-                                   #'tau_m' : 25.0,
                                     'tau_syn_in' : 1.6})
 
 nest.SetDefaults('olivary_neuron',{'t_ref' : 1.0,
@@ -80,7 +79,6 @@ nest.SetDefaults('olivary_neuron',{'t_ref' : 1.0,
                                     'V_th' : -40.0,
                                     'V_reset' : -70.0,
                                     'g_L' : 0.2,
-                                   #'tau_m' : 10.0,
                                     'tau_syn_ex' : 0.5,
                                     'tau_syn_in' : 10.0})
 
@@ -89,7 +87,6 @@ nest.SetDefaults('nuclear_neuron',{'t_ref' : 1.0,
                                     'V_th' : -40.0,
                                     'V_reset' : -70.0,
                                     'g_L' : 0.2,
-                                   #'tau_m' : 10.0,
                                     'tau_syn_ex' : 0.5,
                                     'tau_syn_in' : 10.0})
 if PLAST3:
@@ -115,10 +112,10 @@ if PLAST2:
     vt2=nest.Create("volume_transmitter_alberto",DCN_number)
 
 recdict2 = {"to_memory": False,
-           "to_file":    True,
-           "label":     "PFPC",
-           "senders":    GR,
-           "targets":    PC
+            "to_file":    True,
+            "label":     "PFPC_" + str(CORES),
+            "senders":    GR,
+            "targets":    PC
            }
 WeightPFPC = nest.Create('weight_recorder',params=recdict2)
 
@@ -242,11 +239,11 @@ nest.PrintNetwork(2)
 
 if RECORDING_CELLS:    
     # Create Auxiliary tools
-    recdict = [{"to_memory": True, "to_file":True, "withgid":True, "withtime":  True, "label":"Spike_Detector_MF"},
-               {"to_memory": True, "to_file":True, "withgid":True, "withtime":  True, "label":"Spike_Detector_GR"},
-               {"to_memory": True, "to_file":True, "withgid":True, "withtime":  True, "label":"Spike_Detector_PC"},
-               {"to_memory": True, "to_file":True, "withgid":True, "withtime":  True, "label":"Spike_Detector_IO"},
-               {"to_memory": True, "to_file":True, "withgid":True, "withtime":  True, "label":"Spike_Detector_DCN"}]
+    recdict = [{"to_memory": True, "to_file":True, "withgid":True, "withtime":  True, "label":"Spike_Detector_MF" + str(CORES)},
+               {"to_memory": True, "to_file":True, "withgid":True, "withtime":  True, "label":"Spike_Detector_GR" + str(CORES)},
+               {"to_memory": True, "to_file":True, "withgid":True, "withtime":  True, "label":"Spike_Detector_PC" + str(CORES)},
+               {"to_memory": True, "to_file":True, "withgid":True, "withtime":  True, "label":"Spike_Detector_IO" + str(CORES)},
+               {"to_memory": True, "to_file":True, "withgid":True, "withtime":  True, "label":"Spike_Detector_DCN"+ str(CORES)}]
     spikedetector = nest.Create("spike_detector",5,params=recdict)
     nest.Connect(MF,  [spikedetector[0]])
     nest.Connect(GR,  [spikedetector[1]])
@@ -268,7 +265,7 @@ for MFi in Input_generation:
         Spikes_f.append(float(elements))
     nest.SetStatus([MFi],{'spike_times' : Spikes_f})
 
-	aux.tic()
+aux.tic()
 msd = 1000 # master seed
 n_vp = nest.GetKernelStatus('total_num_virtual_procs')
 msdrange1 = range(msd, msd+n_vp )
