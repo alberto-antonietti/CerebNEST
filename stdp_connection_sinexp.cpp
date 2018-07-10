@@ -52,7 +52,6 @@ STDPSinExpCommonProperties::STDPSinExpCommonProperties()
   , A_minus_( 1.5 )
   , Wmin_( 0.0 )
   , Wmax_( 200.0 )
-  , vtC_ ( 0 )
 {
 }
 

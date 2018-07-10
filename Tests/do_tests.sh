@@ -9,7 +9,7 @@ mpirun -np 4 python Check_MultiThreading.py 4
 
 python Remove_Empty.py
 
-diff -u  Weights_1-* Weights_4- > Diff_Weights.csv
+diff -u  Weights_1-* Weights_4-* > Diff_Weights.csv
 
 if [[ -s Diff_Weights.csv ]]; then echo "WARNING! Weight Files are different!"; else echo "OK"; fi
 
