@@ -88,7 +88,17 @@ public:
 inline long
 STDPSinExpCommonProperties::get_vt_gid() const
 {
-    return -2;
+  if ( vt_ != 0 )
+
+  {
+    std::cout << vt_->get_gid() << std::endl;
+    return vt_->get_gid();
+  }
+
+  else
+  {
+    return -1;
+  }
 }
 
 
@@ -165,7 +175,7 @@ public:
 	  
     ConnTestDummyNode dummy_target;
     ConnectionBase::check_connection_( dummy_target, s, t, receptor_type );
-
+    
     t.register_stdp_connection( t_lastspike - get_delay() );
   }
 
@@ -228,7 +238,7 @@ template < typename targetidentifierT > void STDPSinExpConnection< targetidentif
 }
 
 template < typename targetidentifierT > long STDPSinExpConnection< targetidentifierT >::get_vt_gid( ) const{
-
+    std::cout << "get_vt_gid2 " << std::endl;
     if ( vt_ != 0 ){
 		return vt_->get_gid();
 	}
@@ -254,7 +264,8 @@ template < typename targetidentifierT > inline void STDPSinExpConnection< target
 															  const std::vector< nest::spikecounter >& dopa_spikes,
 															  const STDPSinExpCommonProperties& cp ){
 	// We enter here when there is a spike of the Volume Transmitter
-	double minus_dt = dopa_spikes[ dopa_spikes_idx_+1].spike_time_-1;
+	std::cout << " UPDATE DOPAMInE" << std::endl;
+        double minus_dt = dopa_spikes[ dopa_spikes_idx_+1].spike_time_-1;
 	if (SpikeBuffer_.size()>0){
 		double LTD_amount = 0.0;
 		for(unsigned int GR = 0; GR<SpikeBuffer_.size(); GR++){
@@ -276,7 +287,6 @@ template < typename targetidentifierT > inline void STDPSinExpConnection< target
 template < typename targetidentifierT > inline void STDPSinExpConnection< targetidentifierT >::update_weight_(double weight_change, const STDPSinExpCommonProperties& cp ){
   // LTP or LTD, depending on who calls this function
   weight_ = weight_+weight_change;
-  
   if ( weight_ < cp.Wmin_ )
     weight_ = cp.Wmin_;
   if ( weight_ > cp.Wmax_ )
@@ -286,6 +296,7 @@ template < typename targetidentifierT > inline void STDPSinExpConnection< target
 template < typename targetidentifierT > inline void STDPSinExpConnection< targetidentifierT >::process_dopa_spikes_(const std::vector< nest::spikecounter >& dopa_spikes, double t0, double t1, const STDPSinExpCommonProperties& cp ){
   // process dopa spikes in (t0, t1]
   // propagate weight from t0 to t1
+  std::cout << "process_dopa_spikes" << std::endl;
   if ( ( dopa_spikes.size() > dopa_spikes_idx_ + 1 ) && ( dopa_spikes[ dopa_spikes_idx_ + 1 ].spike_time_ <= t1 ) ){
     // A IO SPIKE IS DETECTED AT TIME T0, LTD happens with a different amplitude, it depends on the distance between IO SPIKE and PF spikes
     update_dopamine_( dopa_spikes, cp );
@@ -327,6 +338,7 @@ template < typename targetidentifierT > inline void STDPSinExpConnection< target
 																   const double t_trig,
 																   const STDPSinExpCommonProperties& cp ){
   
+  std::cout << "TRIGGER_UPDATE_WEIGHT " << std::endl;
   int Vid_Check = (dopa_spikes.back()).multiplicity_;
   std::vector< nest::spikecounter > dopa_temp = dopa_spikes;
   dopa_temp.pop_back();
