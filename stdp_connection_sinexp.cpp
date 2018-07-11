@@ -19,14 +19,14 @@
  *  along with NEST.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
- 
+
  /*
 
    Alberto Antonietti
    alberto.antonietti@polimi.it
-  
+
    Cerebellar PF-PC Plasticity with an exp. sin. Kernel LTP and LTD
- 
+
  */
 
 #include "stdp_connection_sinexp.h"
@@ -52,25 +52,50 @@ STDPSinExpCommonProperties::STDPSinExpCommonProperties()
   , A_minus_( 1.5 )
   , Wmin_( 0.0 )
   , Wmax_( 200.0 )
+  , vtC_ ( 0 )
 {
 }
 
-void STDPSinExpCommonProperties::get_status( DictionaryDatum& d ) const{
+void
+STDPSinExpCommonProperties::get_status( DictionaryDatum& d ) const
+{
   nest::CommonSynapseProperties::get_status( d );
+  if ( vtC_ != 0 )
+  {
+    def< long >( d, nest::names::vt, vtC_->get_gid() );
+  }
 
-  def< double >( d, "A_plus", A_plus_ );
-  def< double >( d, "A_minus", A_minus_ );
-  def< double >( d, "Wmin", Wmin_ );
-  def< double >( d, "Wmax", Wmax_ );
+  else
+  {
+    def< long >( d, nest::names::vt, -1 );
+  }
+  def< double >( d, nest::names::A_plus, A_plus_ );
+  def< double >( d, nest::names::A_minus, A_minus_ );
+  def< double >( d, nest::names::Wmin, Wmin_ );
+  def< double >( d, nest::names::Wmax, Wmax_ );
 }
 
-void STDPSinExpCommonProperties::set_status( const DictionaryDatum& d, nest::ConnectorModel& cm ){
+void
+STDPSinExpCommonProperties::set_status( const DictionaryDatum& d,
+  nest::ConnectorModel& cm )
+{
   nest::CommonSynapseProperties::set_status( d, cm );
 
-  updateValue< double >( d, "A_plus", A_plus_ );
-  updateValue< double >( d, "A_minus", A_minus_ );
-  updateValue< double >( d, "Wmin", Wmin_ );
-  updateValue< double >( d, "Wmax", Wmax_ );
+  long vtgid;
+  if ( updateValue< long >( d, nest::names::vt, vtgid ) )
+  {
+    vtC_ = dynamic_cast< volume_transmitter_alberto* >( nest::kernel().node_manager.get_node(
+      vtgid, nest::kernel().vp_manager.get_thread_id() ) );
+    if ( vtC_ == 0 )
+    {
+      throw nest::BadProperty( "Dopamine source must be volume transmitter" );
+    }
+  }
+
+  updateValue< double >( d, nest::names::A_plus, A_plus_ );
+  updateValue< double >( d, nest::names::A_minus, A_minus_ );
+  updateValue< double >( d, nest::names::Wmin, Wmin_ );
+  updateValue< double >( d, nest::names::Wmax, Wmax_ );
 }
 
 } // End of namespace mynest
