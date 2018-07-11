@@ -251,7 +251,6 @@ template < typename targetidentifierT > void STDPSinExpConnection< targetidentif
   if ( updateValue< long >( d, "vt", vtgid ) )
   {
     vt_ = dynamic_cast< volume_transmitter_alberto* >( nest::kernel().node_manager.get_node( vtgid ) );
-    //vtC_ = vt_;
     if ( vt_ == 0 )
     {
       throw nest::BadProperty( "vt needs to be a Volume Transmitter" );
@@ -260,8 +259,10 @@ template < typename targetidentifierT > void STDPSinExpConnection< targetidentif
 }
 
 
-template < typename targetidentifierT > inline void STDPSinExpConnection< targetidentifierT >::update_dopamine_( const std::vector< nest::spikecounter >& dopa_spikes,
-                                                                                                                 const STDPSinExpCommonProperties& cp ){
+template < typename targetidentifierT > inline void STDPSinExpConnection< targetidentifierT >::update_dopamine_(
+  const std::vector< nest::spikecounter >& dopa_spikes,
+  const STDPSinExpCommonProperties& cp )
+{
   // We enter here when there is a spike of the Volume Transmitter
   double minus_dt = dopa_spikes[ dopa_spikes_idx_+1].spike_time_-1;
   if (SpikeBuffer_.size()>0)
@@ -279,8 +280,6 @@ template < typename targetidentifierT > inline void STDPSinExpConnection< target
   }
   ++dopa_spikes_idx_;
 }
-
-
 
 
 template < typename targetidentifierT > inline void STDPSinExpConnection< targetidentifierT >::update_weight_(double weight_change, const STDPSinExpCommonProperties& cp ){

@@ -24,9 +24,9 @@
 
    Alberto Antonietti
    alberto.antonietti@polimi.it
-  
+
    Cerebellar PF-PC Plasticity with an exp. cos. Kernel LTP and LTD
- 
+
  */
 
 #ifndef STDP_CONNECTION_COSEXP_H
@@ -34,12 +34,12 @@
 
 /* BeginDocumentation
 
-   Name: 
+   Name:
 
    Description:
-   
+
    Examples:
-   
+
    Parameters:
            vt		 long   - ID of volume_transmitter collecting the spikes from the pool of
                               dopamine releasing neurons and transmitting the spikes
@@ -75,7 +75,7 @@ public:
   void get_status( DictionaryDatum& d ) const;
 
   void set_status( const DictionaryDatum& d, nest::ConnectorModel& cm );
-  
+
   long get_vt_gid() const;
 
   double A_plus_;
@@ -88,9 +88,16 @@ public:
 inline long
 STDPCosExpCommonProperties::get_vt_gid() const
 {
-    return -2;
-}
+  if ( vtC_ != 0 )
+  {
+    return vtC_->get_gid();
+  }
 
+  else
+  {
+    return -1;
+  }
+}
 
 
 /**
@@ -145,7 +152,7 @@ public:
       return nest::invalid_port_;
     }
   };
-  
+
 
   /*
    * This function calls check_connection on the sender and checks if the receiver
@@ -164,7 +171,7 @@ public:
    * \param t_lastspike last spike produced by presynaptic neuron (in ms)
    */
   void check_connection( nest::Node& s, nest::Node& t, nest::rport receptor_type, double t_lastspike, const CommonPropertiesType& cp ){
-	  
+
     ConnTestDummyNode dummy_target;
     ConnectionBase::check_connection_( dummy_target, s, t, receptor_type );
 
@@ -180,7 +187,7 @@ private:
   void update_dopamine_( const std::vector< nest::spikecounter >& dopa_spikes,const STDPCosExpCommonProperties& cp );
 
   void update_weight_(double weight_change, const STDPCosExpCommonProperties& cp );
-  
+
   void process_dopa_spikes_( const std::vector< nest::spikecounter >& dopa_spikes, double t0, double t1, const STDPCosExpCommonProperties& cp );
 
   // data members of each connection
@@ -230,7 +237,6 @@ template < typename targetidentifierT > void STDPCosExpConnection< targetidentif
 }
 
 template < typename targetidentifierT > long STDPCosExpConnection< targetidentifierT >::get_vt_gid( ) const{
-
     if ( vt_ != 0 ){
 		return vt_->get_gid();
 	}
@@ -244,50 +250,56 @@ template < typename targetidentifierT > void STDPCosExpConnection< targetidentif
   ConnectionBase::set_status( d, cm );
   updateValue< double >( d, nest::names::weight, weight_ );
   long vtgid;
-  if ( updateValue< long >( d, "vt", vtgid ) ){
+  if ( updateValue< long >( d, "vt", vtgid ) )
+  {
     vt_ = dynamic_cast< volume_transmitter_alberto* >( nest::kernel().node_manager.get_node( vtgid ) );
     if ( vt_ == 0 )
+    {
       throw nest::BadProperty( "vt needs to be a Volume Transmitter" );
+    }
   }
 }
 
 
 template < typename targetidentifierT > inline void STDPCosExpConnection< targetidentifierT >::update_dopamine_(
-															  const std::vector< nest::spikecounter >& dopa_spikes,
-															  const STDPCosExpCommonProperties& cp ){
-	// We enter here when there is a spike of the Volume Transmitter
-	double minus_dt = dopa_spikes[ dopa_spikes_idx_+1].spike_time_-1;
-	LastDopaSpike_ = minus_dt;
-	
-	if (SpikeBuffer_.size()>0){
-		while(SpikeBuffer_[0]<minus_dt-10.0){
-			SpikeBuffer_.erase(SpikeBuffer_.begin());
-			if (SpikeBuffer_.size()==0)
-				break;
-		}
-	}
+  const std::vector< nest::spikecounter >& dopa_spikes,
+  const STDPCosExpCommonProperties& cp )
+{
+  // We enter here when there is a spike of the Volume Transmitter
+  double minus_dt = dopa_spikes[ dopa_spikes_idx_+1].spike_time_-1;
+  LastDopaSpike_ = minus_dt;
+  if (SpikeBuffer_.size()>0)
+  {
+  while(SpikeBuffer_[0]<minus_dt-10.0)
+    {
+    SpikeBuffer_.erase(SpikeBuffer_.begin());
+      if (SpikeBuffer_.size()==0)
+      {
+        break;
+      }
+    }
+  }
 
-	if (minus_dt > 0 && SpikeBuffer_.size()>0){
-		double LTD_amount = 0.0;
-		for(unsigned int MF = 0; MF<SpikeBuffer_.size(); MF++){
-			double sd= SpikeBuffer_[MF] - minus_dt;
-			if (sd <= 10.0 && sd >= -10.0){
-				LTD_amount += cp.A_minus_ * exp(-(fabs(400.0*sd/1000.0)))*pow(cos(sd/1000.0),2);
-			}
-		}
-		update_weight_(LTD_amount, cp);
-	}
-	
+  if (minus_dt > 0 && SpikeBuffer_.size()>0)
+  {
+    double LTD_amount = 0.0;
+    for(unsigned int MF = 0; MF<SpikeBuffer_.size(); MF++)
+    {
+      double sd= SpikeBuffer_[MF] - minus_dt;
+      if (sd <= 10.0 && sd >= -10.0)
+        {
+        LTD_amount += cp.A_minus_ * exp(-(fabs(400.0*sd/1000.0)))*pow(cos(sd/1000.0),2);
+        }
+      }
+    update_weight_(LTD_amount, cp);
+  }
   ++dopa_spikes_idx_;
 }
-
-
 
 
 template < typename targetidentifierT > inline void STDPCosExpConnection< targetidentifierT >::update_weight_(double weight_change, const STDPCosExpCommonProperties& cp ){
   // LTP or LTD, depending on who calls this function
   weight_ = weight_+weight_change;
-  
   if ( weight_ < cp.Wmin_ )
     weight_ = cp.Wmin_;
   if ( weight_ > cp.Wmax_ )
@@ -297,7 +309,7 @@ template < typename targetidentifierT > inline void STDPCosExpConnection< target
 template < typename targetidentifierT > inline void STDPCosExpConnection< targetidentifierT >::process_dopa_spikes_(const std::vector< nest::spikecounter >& dopa_spikes, double t0, double t1, const STDPCosExpCommonProperties& cp ){
   // process dopa spikes in (t0, t1]
   // propagate weight from t0 to t1
-  if ( ( dopa_spikes.size() > dopa_spikes_idx_ + 1 ) && ( dopa_spikes[ dopa_spikes_idx_ + 1 ].spike_time_ <= t1 ) ){
+  if ( ( dopa_spikes.size() > dopa_spikes_idx_ ) && ( dopa_spikes[ dopa_spikes_idx_ ].spike_time_ <= t1 ) ){
     // A IO SPIKE IS DETECTED AT TIME T0, LTD happens with a different amplitude, it depends on the distance between IO SPIKE and PF spikes
     update_dopamine_( dopa_spikes, cp );
   }
