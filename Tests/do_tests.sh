@@ -1,24 +1,78 @@
 #!/bin/bash
 echo "Launching Tests for Alberto Module"
 
-python Check_Models.py
+python Check_Models.py  &>TestLog.txt
+if [ $? = 0 ]; then
+  echo "Check_Models.py SUCCESS"
+else
+  echo "Check_Models.py FAIL"
+fi
 
-mpirun -np 1 python Check_MultiThreading.py 1
+mpirun -np 1 python Check_MultiThreading.py 1 &>>TestLog.txt
+if [ $? = 0 ]; then
+  echo "Check_MultiThreading.py with 1 Core SUCCESS"
+else
+  echo "Check_MultiThreading.py with 1 Core FAIL"
+fi
 
-mpirun -np 4 python Check_MultiThreading.py 4
 
-python Remove_Empty.py
+mpirun -np 4 python Check_MultiThreading.py 4 &>>TestLog.txt
+if [ $? = 0 ]; then
+  echo "Check_MultiThreading.py with 4 Cores SUCCESS"
+else
+  echo "Check_MultiThreading.py with 4 Cores FAIL"
+fi
+
+python Remove_Empty.py &>>TestLog.txt
 
 diff -u  Weights_1-* Weights_4-* > Diff_Weights.csv
 
-if [[ -s Diff_Weights.csv ]]; then echo "WARNING! Weight Files are different!"; else echo "OK"; fi
+if [[ -s Diff_Weights.csv ]]; then
+  echo "Weights with 1 and 4 Cores are different FAIL";
+else
+  echo "Weights with 1 and 4 Cores are the same SUCCESS";
+fi
 
-mpirun -np 1 python EBCC_closed_loop.py 1
+mpirun -np 1 python Learning_Performance_Test.py 1 &>>TestLog.txt
+if [ $? = 0 ]; then
+  echo "Learning_Performance_Test.py with 1 core SUCCESS"
+else
+  echo "Learning_Performance_Test.py with 1 core FAIL"
+fi
+python Remove_Empty.py &>>TestLog.txt
+mv PFPC-* PFPC1.csv
 
+mpirun -np 4 python Learning_Performance_Test.py 4 &>>TestLog.txt
+if [ $? = 0 ]; then
+  echo "Learning_Performance_Test.py with 4 Core SUCCESS"
+else
+  echo "Learning_Performance_Test.py with 4 Core FAIL"
+fi
+python Remove_Empty.py &>>TestLog.txt
+mv PFPC-* PFPC4.csv
+
+python Compare_with_Ground_Truth.py &>>TestLog.txt
+if [ $? = 0 ]; then
+  echo "Weights with 1 and 4 Cores are the same SUCCESS"
+else
+  echo "Weights with 1 and 4 Cores are different FAIL"
+fi
+
+
+mpirun -np 1 python EBCC_closed_loop.py 1 &>>TestLog.txt
+if [ $? = 0 ]; then
+  echo "EBCC_closed_loop with 1 core SUCCESS"
+else
+  echo "EBCC_closed_loop with 1 core FAIL"
+fi
 mv OutputFile.dat Output_1.dat
 mv CR.dat CR_1.dat
 
-mpirun -np 4 python EBCC_closed_loop.py 4
-
+mpirun -np 4 python EBCC_closed_loop.py 4 &>>TestLog.txt
+if [ $? = 0 ]; then
+  echo "EBCC_closed_loop with 4 Core SUCCESS"
+else
+  echo "EBCC_closed_loop with 4 Core FAIL"
+fi
 mv OutputFile.dat Output_4.dat
 mv CR.dat CR_4.dat

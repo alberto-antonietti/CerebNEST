@@ -4,7 +4,7 @@ import sys
 nest.Install("albertomodule")
 
 VT = nest.Create("volume_transmitter_alberto", 1)
-'''
+
 CLOSED = nest.Create("closed_loop_neuron", 1)
 RBF = nest.Create("radial_basis_function_input", 1)
 PRE = nest.Create("iaf_cond_exp", 1)
@@ -16,8 +16,7 @@ conn_param1 = {"model":    'stdp_synapse_sinexp',
                "Wmin":     0.0,    # double - Minimal synaptic weight 
                "Wmax":     4.0,    # double - Maximal synaptic weight,              
                "weight":   1.0,
-               "delay":    1.0,
-	       "vt":       VT[0]}
+               "delay":    1.0}
 
 nest.Connect(PRE,POST,{'rule': 'one_to_one'},conn_param1)
 A=nest.GetConnections(PRE,POST)
@@ -36,4 +35,3 @@ A=nest.GetConnections(POST,PRE)
 nest.SetStatus(A,{'vt': VT[0]})
 
 sys.exit(0) #Everything went fine
-'''
