@@ -13,8 +13,8 @@ PLAST2 = True
 PLAST3 = True
 
 ''' PROTOCOL SETUP '''
-NumTrial = 100
-NumAcq1 = 80.0
+NumTrial = 10
+NumAcq1 = 8.0
 TrialDuration = 1000.0 # ms
 US_Onset = 400.0 # ISI = 400 ms
 US_Duration = 100.0 # US Duration = 100 ms
@@ -280,5 +280,4 @@ nest.Simulate(TrialDuration*NumTrial)
 
 aux.toc()
 
-
-
+sys.exit(0) #Everything went fine
