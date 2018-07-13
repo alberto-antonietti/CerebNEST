@@ -58,6 +58,7 @@
 #include "volume_transmitter_alberto.h"
 #include "numerics.h"
 #include <math.h>
+#include "mynames.h"
 
 namespace mynest{
 
@@ -204,7 +205,6 @@ private:
 
   // time of last update, which is either time of last presyn. spike or time-driven update
   double t_last_update_;
-
 };
 
 //
@@ -306,7 +306,6 @@ template < typename targetidentifierT > inline void STDPSinExpConnection< target
   // process dopa spikes in (t0, t1]
   // propagate weight from t0 to t1
   if ( ( dopa_spikes.size() > dopa_spikes_idx_ ) && ( dopa_spikes[ dopa_spikes_idx_ ].spike_time_ <= t1 && dopa_spikes[ dopa_spikes_idx_+1 ].multiplicity_ == vt_num_) ){
-    //std::cout << "PROCESS DOPA: " <<  dopa_spikes[ dopa_spikes_idx_+1 ].multiplicity_ << std::endl;
     // A IO SPIKE IS DETECTED AT TIME T0, LTD happens with a different amplitude, it depends on the distance between IO SPIKE and PF spikes
     update_dopamine_( dopa_spikes, cp );
   }
@@ -349,7 +348,6 @@ template < typename targetidentifierT > inline void STDPSinExpConnection< target
 																   const STDPSinExpCommonProperties& cp ){
 
   int Vid_Check = cp.get_vt_gid();
-  //std::cout << get_vt_gid() << " << get_vt_gid() " << Vid_Check << " << Vid_Check " << vt_num_ << " << vt_num " << std::endl;
   if (Vid_Check != get_vt_gid())
         return;
   std::vector< nest::spikecounter > dopa_temp = dopa_spikes;

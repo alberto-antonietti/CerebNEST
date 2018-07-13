@@ -183,6 +183,10 @@ public:
     weight_ = w;
   }
 
+  void set_vt_num( long n ){
+   vt_num_ = n;
+  }
+
 private:
   // update dopamine trace from last to current dopamine spike and increment index
   void update_dopamine_( const std::vector< nest::spikecounter >& dopa_spikes,const STDPCosExpCommonProperties& cp );
@@ -193,6 +197,8 @@ private:
 
   // data members of each connection
   double weight_;
+
+  long vt_num_;
 
   // dopa_spikes_idx_ refers to the dopamine spike that has just been processes
   // after trigger_update_weight a pseudo dopamine spike at t_trig is stored at index 0 and
@@ -213,6 +219,7 @@ template < typename targetidentifierT > STDPCosExpConnection< targetidentifierT 
   , weight_( 1.0 )
   , dopa_spikes_idx_( 0 )
   , t_last_update_( 0.0 )
+  , vt_num_ ( 0 )
 {
 }
 
@@ -222,6 +229,7 @@ template < typename targetidentifierT > STDPCosExpConnection< targetidentifierT 
   , weight_( rhs.weight_ )
   , dopa_spikes_idx_( rhs.dopa_spikes_idx_ )
   , t_last_update_( rhs.t_last_update_ )
+  , vt_num_ ( 0 )
 {
 }
 
@@ -230,6 +238,7 @@ template < typename targetidentifierT > void STDPCosExpConnection< targetidentif
   // base class properties, different for individual synapse
   ConnectionBase::get_status( d );
   def< double >( d, nest::names::weight, weight_ );
+  def< long >( d, "vt_num", vt_num_ );
   if ( vt_ != 0 )
     def< long >( d, "modulator", vt_->get_gid() );
   else
@@ -250,8 +259,9 @@ template < typename targetidentifierT > void STDPCosExpConnection< targetidentif
   // base class properties
   ConnectionBase::set_status( d, cm );
   updateValue< double >( d, nest::names::weight, weight_ );
+  updateValue< long >( d, "vt_num", vt_num_ );
   long vtgid;
-  if ( updateValue< long >( d, "vt", vtgid ) )
+  if ( updateValue< long >( d, nest::names::vt, vtgid ) )
   {
     vt_ = dynamic_cast< volume_transmitter_alberto* >( nest::kernel().node_manager.get_node( vtgid ) );
     if ( vt_ == 0 )
@@ -310,7 +320,7 @@ template < typename targetidentifierT > inline void STDPCosExpConnection< target
 template < typename targetidentifierT > inline void STDPCosExpConnection< targetidentifierT >::process_dopa_spikes_(const std::vector< nest::spikecounter >& dopa_spikes, double t0, double t1, const STDPCosExpCommonProperties& cp ){
   // process dopa spikes in (t0, t1]
   // propagate weight from t0 to t1
-  if ( ( dopa_spikes.size() > dopa_spikes_idx_ ) && ( dopa_spikes[ dopa_spikes_idx_ ].spike_time_ <= t1 ) ){
+  if ( ( dopa_spikes.size() > dopa_spikes_idx_ ) && ( dopa_spikes[ dopa_spikes_idx_ ].spike_time_ <= t1 && dopa_spikes[ dopa_spikes_idx_+1 ].multiplicity_ == vt_num_) ){
     // A IO SPIKE IS DETECTED AT TIME T0, LTD happens with a different amplitude, it depends on the distance between IO SPIKE and PF spikes
     update_dopamine_( dopa_spikes, cp );
   }
@@ -326,14 +336,14 @@ template < typename targetidentifierT > inline void STDPCosExpConnection< target
   // t_lastspike_ = 0 initially
 
   nest::Node* target = get_target( t );
-  
+
   double t_spike = e.get_stamp().get_ms();
-  
+
   // LTP (of a factor A_plus) due to new pre-synaptic spike
   double t_spike_d = t_spike;
   SpikeBuffer_.push_back(t_spike_d);
   update_weight_(cp.A_plus_, cp);
-  
+
   double LTD_amount = 0.0;
   double sd = t_spike_d - LastDopaSpike_+1;
   if (sd <= 10.0){
@@ -357,15 +367,13 @@ template < typename targetidentifierT > inline void STDPCosExpConnection< target
 																   nest::thread t,
 																   const std::vector< nest::spikecounter >& dopa_spikes,
 																   const double t_trig,
-																   const STDPCosExpCommonProperties& cp ){
-  
-  int Vid_Check = (dopa_spikes.back()).multiplicity_;
-  std::vector< nest::spikecounter > dopa_temp = dopa_spikes;
-  dopa_temp.pop_back();
-  const std::vector< nest::spikecounter > dopa_temp2 = dopa_temp;
-  if (Vid_Check != get_vt_gid())
-	return;
+																   const STDPSinExpCommonProperties& cp ){
 
+  int Vid_Check = cp.get_vt_gid();
+  if (Vid_Check != get_vt_gid())
+        return;
+  std::vector< nest::spikecounter > dopa_temp = dopa_spikes;
+  const std::vector< nest::spikecounter > dopa_temp2 = dopa_temp;
   // purely dendritic delay
   double dendritic_delay = get_delay();
 
@@ -373,7 +381,7 @@ template < typename targetidentifierT > inline void STDPCosExpConnection< target
   std::deque< nest::histentry >::iterator start;
   std::deque< nest::histentry >::iterator finish;
   get_target( t )->get_history(t_last_update_ - dendritic_delay, t_trig - dendritic_delay, &start, &finish );
-    
+
   // facilitation due to postsyn. spikes since last update
   double t0 = t_last_update_;
 
@@ -381,7 +389,7 @@ template < typename targetidentifierT > inline void STDPCosExpConnection< target
   // t_trig
   // but do not increment/decrement as there are no spikes to be handled at t_trig
   process_dopa_spikes_( dopa_temp2, t0, t_trig, cp );
-  
+
   t_last_update_ = t_trig;
   dopa_spikes_idx_ = 0;
 }

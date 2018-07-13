@@ -58,6 +58,30 @@ else
   echo "Weights with 1 and 4 Cores are different FAIL"
 fi
 
+mpirun -np 1 python Learning_Performance_Test2.py 1 &>>TestLog.txt
+if [ $? = 0 ]; then
+  echo "Learning_Performance_Test2.py with 1 core SUCCESS"
+else
+  echo "Learning_Performance_Test2.py with 1 core FAIL"
+fi
+python Remove_Empty.py &>>TestLog.txt
+mv MFDCN-* MFDCN1.csv
+
+mpirun -np 4 python Learning_Performance_Test2.py 4 &>>TestLog.txt
+if [ $? = 0 ]; then
+  echo "Learning_Performance_Test2.py with 4 Core SUCCESS"
+else
+  echo "Learning_Performance_Test2.py with 4 Core FAIL"
+fi
+python Remove_Empty.py &>>TestLog.txt
+mv MFDCN-* MFDCN4.csv
+
+python Compare_with_Ground_Truth2.py &>>TestLog.txt
+if [ $? = 0 ]; then
+  echo "Weights with 1 and 4 Cores are the same SUCCESS"
+else
+  echo "Weights with 1 and 4 Cores are different FAIL"
+fi
 
 mpirun -np 1 python EBCC_closed_loop.py 1 &>>TestLog.txt
 if [ $? = 0 ]; then
@@ -67,6 +91,7 @@ else
 fi
 mv OutputFile.dat Output_1.dat
 mv CR.dat CR_1.dat
+python Remove_Empty.py &>>TestLog.txt
 
 mpirun -np 4 python EBCC_closed_loop.py 4 &>>TestLog.txt
 if [ $? = 0 ]; then
@@ -76,3 +101,12 @@ else
 fi
 mv OutputFile.dat Output_4.dat
 mv CR.dat CR_4.dat
+python Remove_Empty.py &>>TestLog.txt
+
+diff -u  Output_1.dat Output_4.dat > Diff_Output.csv
+
+if [[ -s Diff_Output.csv ]]; then
+  echo "Weights with 1 and 4 Cores are different FAIL";
+else
+  echo "Weights with 1 and 4 Cores are the same SUCCESS";
+fi

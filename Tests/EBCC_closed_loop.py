@@ -109,8 +109,12 @@ DCN = nest.Create("nuclear_neuron", DCN_number)
 
 if PLAST1:
     vt=nest.Create("volume_transmitter_alberto",PC_number)
+    for n,vti in enumerate(vt):
+        nest.SetStatus([vti],{"vt_num" : n})
 if PLAST2:
     vt2=nest.Create("volume_transmitter_alberto",DCN_number)
+    for n,vti in enumerate(vt2):
+        nest.SetStatus([vti],{"vt_num" : n})
 
 recdict2 = {"to_memory": False,
             "to_file":    True,
@@ -149,6 +153,7 @@ if PLAST1:
                                             "A_plus":    LTP1,   # double - Amplitude of weight change for facilitation 
                                             "Wmin":      0.0,    # double - Minimal synaptic weight 
                                             "Wmax":      4.0,    # double - Maximal synaptic weight
+                                            "vt":        vt[0],
                                             "weight_recorder" : WeightPFPC[0]
                                             })
     PFPC_conn_param = {"model":  'stdp_synapse_sinexp',
@@ -158,7 +163,7 @@ if PLAST1:
     for i,PCi in enumerate(PC):
         nest.Connect(GR,[PCi],{'rule': 'fixed_indegree', 'indegree': int(0.8*GR_number), "multapses": False},PFPC_conn_param)
         A=nest.GetConnections(GR,[PCi])
-        nest.SetStatus(A,{'vt': vt[i]})
+        nest.SetStatus(A,{'vt_num': i})
 else:
     PFPC_conn_param = {"model":  "static_synapse",
                        "weight": Init_PFPC,
@@ -178,7 +183,8 @@ if PLAST2:
     nest.SetDefaults('stdp_synapse_cosexp',{"A_minus":   LTD2,   # double - Amplitude of weight change for depression
                                             "A_plus":    LTP2,   # double - Amplitude of weight change for facilitation 
                                             "Wmin":      0.0,    # double - Minimal synaptic weight 
-                                            "Wmax":      0.25     # double - Maximal synaptic weight 
+                                            "Wmax":      0.25,     # double - Maximal synaptic weight
+                                            "vt":        vt2[0]
                                             })
     
     MFDCN_conn_param = {"model": 'stdp_synapse_cosexp',
@@ -187,7 +193,7 @@ if PLAST2:
     for i,DCNi in enumerate(DCN):
         nest.Connect(MF,[DCNi],'all_to_all',MFDCN_conn_param)
         A=nest.GetConnections(MF,[DCNi])
-        nest.SetStatus(A,{'vt': vt2[i]})
+        nest.SetStatus(A,{'vt_num': i})
 else:
     MFDCN_conn_param = {"model":  "static_synapse",
                         "weight": Init_MFDCN,

@@ -95,7 +95,7 @@ if PLAST1:
 												"Wmin":      -4.0,    # double - Minimal synaptic weight 
 												"Wmax":      4.0,    # double - Maximal synaptic weight
 												"weight_recorder": WeightPFPC[0],
-                                                                                                "vt": vt[0]
+                                                "vt": vt[0]
 												})
     else:
 		nest.SetDefaults('stdp_synapse_sinexp',{"A_minus":   LTD1,   # double - Amplitude of weight change for depression
