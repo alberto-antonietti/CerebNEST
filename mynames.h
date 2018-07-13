@@ -47,6 +47,8 @@ extern const Name protocol;
 extern const Name Tduration; //!< US duration for Closed Loop Neuron
 extern const Name sdev;
 
+extern const Name vt_num;
+
 }
 }
 

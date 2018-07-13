@@ -10,8 +10,8 @@ nest.Install("albertomodule")
 
 # Cell numbers
 GR_number = 65600
-PC_number = 1 
-IO_number = 1  
+PC_number = 2 
+IO_number = 2  
 
 ''' SIMULATION PROPERTIES '''
 CORES = int(sys.argv[1])
@@ -73,12 +73,14 @@ if RECORDING_WEIGHTS:
     
 if PLAST1:
     vt=nest.Create("volume_transmitter_alberto",PC_number)
+    for n,vti in enumerate(vt):
+        nest.SetStatus([vti],{"vt_num" : n})
     
 # Connection 0
 nest.Connect(InputGen,GR,"one_to_one",{"model": "static_synapse",
-                                    "weight": 1.0,
-                                    "delay": 1.0 
-                                    })
+                                       "weight": 1.0,
+                                       "delay": 1.0 
+                                       })
                                     
 nest.Connect(ErrorGen,IO,"one_to_one",{"model": "static_synapse",
                                        "weight": 1.0,
@@ -92,20 +94,24 @@ if PLAST1:
 												"A_plus":    LTP1,   # double - Amplitude of weight change for facilitation 
 												"Wmin":      -4.0,    # double - Minimal synaptic weight 
 												"Wmax":      4.0,    # double - Maximal synaptic weight
-                                                                                                "vt":        vt[0],
-												"weight_recorder": WeightPFPC[0]
+												"weight_recorder": WeightPFPC[0],
+                                                                                                "vt": vt[0]
 												})
     else:
 		nest.SetDefaults('stdp_synapse_sinexp',{"A_minus":   LTD1,   # double - Amplitude of weight change for depression
 												"A_plus":    LTP1,   # double - Amplitude of weight change for facilitation 
 												"Wmin":      0.0,    # double - Minimal synaptic weight 
-												"Wmax":      4.0,    # double - Maximal synaptic weight
-												"vt":        vt[0]})	
+												"Wmax":      4.0,
+                                                                                                "vt":        vt[0]
+                                                                                                })	
     PFPC_conn_param = {"model":  'stdp_synapse_sinexp',
                        "weight": Init_PFPC,
                        "delay":  1.0,
                        }
     nest.Connect(GR,PC,{'rule': "fixed_indegree", 'indegree':65600, "multapses": False, "autapses": False},PFPC_conn_param)
+    for n,PCi in enumerate(PC):
+        A=nest.GetConnections(GR,[PCi])
+        nest.SetStatus(A,{'vt_num': n})
 
 else:
     PFPC_conn_param = {"model":  "static_synapse",
@@ -119,7 +125,7 @@ print("Number of GR-PC synapses: " + str(len(PFPC_conn)))
 # Connection 7
 if PLAST1:
     # IO-PC teaching connections
-    nest.Connect(IO,vt,'all_to_all',{"model": "static_synapse",
+    nest.Connect(IO,vt,'one_to_one',{"model": "static_synapse",
                                      "weight": 1.0,
                                      "delay": 1.0})
     IOPC_conn = nest.GetConnections(IO,vt)
@@ -145,7 +151,8 @@ for InputGeni in InputGen:
         Spikes_f.append(float(elements))
     nest.SetStatus([InputGeni],{'spike_times' : Spikes_f})
     
-nest.SetStatus(ErrorGen,{'spike_times' : [8.0, 98.0, 298.0, 308.0, 318.0, 498.0, 598.0, 698.0, 798.0, 997.0]})
+nest.SetStatus([ErrorGen[0]],{'spike_times' : [8.0, 98.0, 298.0, 308.0, 318.0, 498.0, 598.0, 698.0, 798.0, 997.0]})
+nest.SetStatus([ErrorGen[1]],{'spike_times' : [18.0, 198.0, 258.0, 358.0, 368.0, 458.0, 558.0, 658.0, 758.0, 957.0]})
 
 aux.toc()
 

@@ -58,6 +58,7 @@
 #include "volume_transmitter_alberto.h"
 #include "numerics.h"
 #include <math.h>
+#include "mynames.h"
 
 namespace mynest{
 
