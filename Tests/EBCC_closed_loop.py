@@ -13,12 +13,12 @@ PLAST2 = True
 PLAST3 = True
 
 ''' PROTOCOL SETUP '''
-NumTrial = 10
-NumAcq1 = 8.0
-TrialDuration = 1000.0 # ms
+NumTrial = 100
+NumAcq1 = 80.0
+TrialDuration = 500.0 # ms
 US_Onset = 400.0 # ISI = 400 ms
 US_Duration = 100.0 # US Duration = 100 ms
-CR_Threshold = 50.0 # DCNAvg threshold that has to be reached to produce a CR
+CR_Threshold = 5.0 # DCNAvg threshold that has to be reached to produce a CR
 
 LTP1 =  1.5e-2
 LTD1 = -1e-1

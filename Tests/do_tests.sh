@@ -49,7 +49,7 @@ else
   echo "Learning_Performance_Test.py with 4 Core FAIL"
 fi
 python Remove_Empty.py &>>TestLog.txt
-mv PFPC-* PFPC4.csv
+cat PFPC-* > PFPC4.csv
 
 python Compare_with_Ground_Truth.py &>>TestLog.txt
 if [ $? = 0 ]; then

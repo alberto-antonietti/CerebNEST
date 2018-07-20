@@ -93,7 +93,6 @@ STDPCosExpCommonProperties::get_vt_gid() const
   {
     return vtC_->get_gid();
   }
-
   else
   {
     return -1;
@@ -116,9 +115,9 @@ public:
   volume_transmitter_alberto* vt_;
 
   std::vector<double> SpikeBuffer_;
-  
+
   double LastDopaSpike_; // IN ORDER TO HAVE LTD WHEN THE DOPA SPIKE HAPPENS BEFORE THE PRE-SYN NEURON SPIKE
-  
+
   typedef STDPCosExpCommonProperties CommonPropertiesType;
   typedef nest::Connection< targetidentifierT > ConnectionBase;
 
@@ -367,7 +366,7 @@ template < typename targetidentifierT > inline void STDPCosExpConnection< target
 																   nest::thread t,
 																   const std::vector< nest::spikecounter >& dopa_spikes,
 																   const double t_trig,
-																   const STDPSinExpCommonProperties& cp ){
+																   const STDPCosExpCommonProperties& cp ){
 
   int Vid_Check = cp.get_vt_gid();
   if (Vid_Check != get_vt_gid())
