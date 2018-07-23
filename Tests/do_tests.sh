@@ -1,5 +1,7 @@
 #!/bin/bash
 echo "Launching Tests for Alberto Module"
+rm *.csv
+rm *.gdf
 
 python Check_Models.py  &>TestLog.txt
 if [ $? = 0 ]; then

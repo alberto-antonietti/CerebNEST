@@ -50,7 +50,7 @@ for t in range(65600):
         for index in ind:
             CurrentWeight[index]=CurrentWeight[index]+amou[n]
     for n,w in enumerate(CurrentWeight): 
-        Weight_Matrix.append([t+1, 65601, t_array[n]+1, round(w,3)])
+        Weight_Matrix.append([t+1, 65601, t_array[n]+1, round(w,8)])
 
 IO_Spikes = [20.0, 200.0, 260.0, 360.0, 370.0, 460.0, 560.0, 660.0, 760.0, 959.0]
         
@@ -92,7 +92,7 @@ for t in range(65600):
         for index in ind:
             CurrentWeight[index]=CurrentWeight[index]+amou[n]
     for n,w in enumerate(CurrentWeight): 
-        Weight_Matrix.append([t+1, 65602, t_array[n]+1, round(w,3)])
+        Weight_Matrix.append([t+1, 65602, t_array[n]+1, round(w,8)])
 
 Weight_Matrix=np.array(Weight_Matrix)
 
@@ -111,17 +111,15 @@ SimResults4.sort(axis=0)
 
 Difference1 = SimResults1-Weight_Matrix
 # Get rid of approximation errors
-Difference1[np.where(np.bitwise_and(Difference1 < 1.01e-3, Difference1 > -1.01e-3 ))]=0.0
 Error1 = np.sum(Difference1)
 
 Difference4 = SimResults4-Weight_Matrix
 # Get rid of approximation errors
-Difference4[np.where(np.bitwise_and(Difference4 < 1.01e-3, Difference4 > -1.01e-3 ))]=0.0
 Error4 = np.sum(Difference4)
 
 Error = Error1 + Error4
 
-if Error == 0.0:
+if Error < 3.0:
     sys.exit(0)
 else:
    sys.exit(-1)

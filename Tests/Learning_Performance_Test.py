@@ -67,7 +67,8 @@ if RECORDING_WEIGHTS:
 				"to_file":    True,
 				"label":     "PFPC",
 				"senders":    GR,
-				"targets":    PC
+				"targets":    PC,
+				"precision":  8
 			   }
     WeightPFPC = nest.Create('weight_recorder',params=recdict2)
     

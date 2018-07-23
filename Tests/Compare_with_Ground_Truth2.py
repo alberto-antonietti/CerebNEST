@@ -8,42 +8,61 @@ LTP2 = 1.0e-3
 LTD2 = -1.0e-2
 Init_MFDCN = 0.07
 
-IO_Spikes = [10.0, 100.0, 300.0, 310.0, 320.0, 500.0, 600.0, 700.0, 800.0, 999.0]
-
 Weight_Matrix = []
-GR_Activity=np.loadtxt("GR_65600.dat")
-for t in range(65600):
-    t_array=GR_Activity[t]
+MF_Activity=np.loadtxt("MF_12.dat")
+PC_Activity=np.loadtxt("PC_40.dat")
+
+for t in range(12):
+    t_array=MF_Activity[t]
     count=0
     LTD_amount = []
     LTD_time = []
+    LTP_amount = []
+    LTP_time = []
     CurrentWeight = []
     LTD_index = 0
-    for GRspike in t_array:
-        if count == 0:
-            CurrentWeight.append(Init_PFPC+LTP1)
-            spike_diff = IO_Spikes-(GRspike+2)
-            spike_diff = spike_diff[np.where((spike_diff>0) & (spike_diff <= 200))]
-            for sds in spike_diff:
-                LTD_amount.append(LTD1*np.exp(-(-sds-150.0)/1000.0)*pow((np.sin(2*3.1415*(-sds-150)/1000.0)),20)/1.2848)
-                LTD_time.append(sds+GRspike+1)
-            count+=1
-        else:
-            CurrentWeight.append(CurrentWeight[count-1]+LTP1)
-            spike_diff = IO_Spikes-(GRspike+2)
-            spike_diff = spike_diff[np.where((spike_diff>0) & (spike_diff <= 200))]
-            for sds in spike_diff:
-                LTD_amount.append(LTD1*np.exp(-(-sds-150.0)/1000.0)*pow((np.sin(2*3.1415*(-sds-150)/1000.0)),20)/1.2848)
-                LTD_time.append(sds+GRspike+1)
-            count+=1   
-    CurrentWeight=np.array(CurrentWeight)      
-    LTD_amount=np.array([x for _,x in sorted(zip(LTD_time,LTD_amount))])
-    LTD_time = sorted(LTD_time)
-    LTD_time_u = np.unique(LTD_time)
-    amou = []
-    for LTD_times_u in LTD_time_u:
-        ind = np.where(LTD_time == LTD_times_u)[0]
-        amou.append(np.sum(LTD_amount[ind]))
+    for t2 in range(40):
+        t2_array=PC_Activity[t2]
+        for n,SpikesMF in enumerate(t_array):
+            LTP_time.append(SpikesMF)
+            LTP_amount.append(LTP2)
+            for m,SpikesPC in enumerate(t2_array):
+                sd = SpikesMF - SpikesPC
+                if sd > 0 and sd <= 10:
+                    LTD_amount.append(LTD2*np.exp(np.fabs(400.0*sd/1000.0))*pow(np.cos(sd/1000.0),2))
+                    LTD_time.append(SpikesMF)
+                elif sd <=0 and sd >=-10:
+                    LTD_amount.append(LTD2*np.exp(np.fabs(400.0*sd/1000.0))*pow(np.cos(sd/1000.0),2))
+                    if n+1<len(t_array):
+                        next_MF_spike=t_array[n+1]
+                        posto=n+1
+                        while(next_MF_spike < SpikesPC and posto<len(t_array)):
+                            next_MF_spike=t_array[posto]
+                            posto+=1
+                        LTD_time.append(next_MF_spike)
+                        if posto>=len(t_array):
+                            LTD_amount.pop()
+                            LTD_time.pop()
+                    else:
+                        LTD_amount.pop()   
+      
+        LTD_amount=np.array([x for _,x in sorted(zip(LTD_time,LTD_amount))])
+        LTD_time = sorted(LTD_time)
+        LTD_time_u = np.unique(LTD_time)
+        amou = []
+        for LTD_times_u in LTD_time_u:
+             ind = np.where(LTD_time == LTD_times_u)[0]
+             amou.append(np.sum(LTD_amount[ind]))
+        CurrentWeight = Init_MFDCN
+        for x,LTPtimes in enumerate(LTP_time):
+             CurrentWeight += LTP_amount[x]
+             print(LTPtimes, LTD_times_u)
+             CurrentLTD = amou[np.where(LTPtimes == LTD_times_u)[0]]
+             if not len(CurrentLTD):
+                 CurrentWeight += CurrentLTD
+             print(t+1, 53, t_array[n]+1, round(CurrentWeight,3))
+
+'''
     count = 0
     for n,LTD_times_u in enumerate(LTD_time_u):
         ind =  np.where(t_array>LTD_times_u)[0]
@@ -83,3 +102,4 @@ if Error == 0.0:
     sys.exit(0)
 else:
    sys.exit(-1)
+'''
