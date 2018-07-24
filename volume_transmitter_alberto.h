@@ -162,6 +162,7 @@ private:
     void get( DictionaryDatum& ) const;
     void set( const DictionaryDatum& );
     long deliver_interval_; //!< update interval in d_min time steps
+    long vt_num_;
   };
 
   //-----------------------------------------------

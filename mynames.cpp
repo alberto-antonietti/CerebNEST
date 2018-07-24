@@ -33,6 +33,6 @@ const Name positive( "positive" );
 const Name protocol( "protocol" );
 const Name Tduration( "Tduration" );
 const Name sdev( "sdev" );
-
+const Name vt_num( "vt_num" );
 }
 }

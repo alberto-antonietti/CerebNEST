@@ -21,7 +21,7 @@ nest.SetKernelStatus({'grng_seed' : msd+n_vp,
 
 
 VT = nest.Create("volume_transmitter_alberto", 1)
-PRE = nest.Create("iaf_cond_exp", 1)
+PRE = nest.Create("parrot_neuron", 1)
 POST = nest.Create("iaf_cond_exp", 1)
 Modulator = nest.Create("parrot_neuron",1)
 recdict = {"to_memory": False,
@@ -31,29 +31,28 @@ recdict = {"to_memory": False,
            "targets":    POST
            }
 WeightRec= nest.Create('weight_recorder',params=recdict)
-nest.SetDefaults('stdp_synapse_sinexp',{ "weight_recorder" : WeightRec[0]})
+
+nest.SetDefaults('stdp_synapse_sinexp',{"A_minus":  -0.10,   # double - Amplitude of weight change for depression
+                                        "A_plus":    0.01,   # double - Amplitude of weight change for facilitation 
+                                        "Wmin":      0.0,    # double - Minimal synaptic weight 
+                                        "Wmax":      4.0,    # double - Maximal synaptic weight
+                                        "vt":        VT[0],
+                                        "weight_recorder": WeightRec[0] })
 
 conn_param1 = {"model":    'stdp_synapse_sinexp',
-               "A_minus": -0.01,   # double - Amplitude of weight change for depression
-               "A_plus":   0.01,   # double - Amplitude of weight change for facilitation 
-               "Wmin":     0.0,    # double - Minimal synaptic weight 
-               "Wmax":     4.0,    # double - Maximal synaptic weight,              
                "weight":   1.0,
                "delay":    1.0}
 
 nest.Connect(PRE,POST,{'rule': 'one_to_one'},conn_param1)
-A=nest.GetConnections(PRE,POST)
-nest.SetStatus(A,{'vt': VT[0]})
-
-
-
-SPIKES1 = [50.0, 100.0, 110.0, 120.0, 130.0,370.0]
+A = nest.GetConnections(PRE,POST)
+nest.SetStatus(A, {"vt_num" : 0})
+SPIKES1 = [50.0, 100.0, 110.0, 120.0, 130.0, 210.0, 370.0, 490.0]
 SPIKES2 = [1.0, 200.0, 220.0, 230.0]
 
 PoissonGen1 = nest.Create('spike_generator',params={'spike_times': SPIKES1})
 PoissonGen2 = nest.Create('spike_generator',params={'spike_times': SPIKES2})
 
-nest.Connect(PoissonGen1,PRE,'one_to_one',{'weight': 1000.0})
+nest.Connect(PoissonGen1,PRE,'one_to_one')
 nest.Connect(PoissonGen2,Modulator,'one_to_one')
 nest.Connect(Modulator,VT,'one_to_one')
 

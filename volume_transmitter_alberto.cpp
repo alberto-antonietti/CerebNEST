@@ -37,7 +37,7 @@
 #include "dictutils.h"
 #include "doubledatum.h"
 #include "integerdatum.h"
-
+#include "mynames.h"
 
 /* ----------------------------------------------------------------
  * Default constructor defining default parameters
@@ -45,6 +45,7 @@
 
 mynest::volume_transmitter_alberto::Parameters_::Parameters_()
   : deliver_interval_( 1 ) // in steps of mindelay
+  , vt_num_ ( 0 )
 {
 }
 
@@ -56,11 +57,13 @@ void
 mynest::volume_transmitter_alberto::Parameters_::get( DictionaryDatum& d ) const
 {
   def< long >( d, "deliver_interval", deliver_interval_ );
+  def< long >( d, "vt_num", vt_num_ );
 }
 
 void mynest::volume_transmitter_alberto::Parameters_::set( const DictionaryDatum& d )
 {
   updateValue< long >( d, "deliver_interval", deliver_interval_ );
+  updateValue< long >( d, "vt_num", vt_num_ );
 }
 
 /* ----------------------------------------------------------------
@@ -112,13 +115,14 @@ mynest::volume_transmitter_alberto::update( nest::Time const& slice_origin, cons
   multiplicity = B_.neuromodulatory_spikes_.get_value( lag );
   if ( multiplicity > 0 ){
      t_spike =  nest::Time( nest::Time::step( nest::kernel().simulation_manager.get_slice_origin().get_steps()+ lag + 1 ) ).get_ms();
-     B_.spikecounter_.push_back( nest::spikecounter( t_spike, multiplicity ) );
+     B_.spikecounter_.push_back( nest::spikecounter( t_spike, P_.vt_num_ ) );
 
      // all spikes stored in spikecounter_ are delivered to the target synapses
      if ( ( nest::kernel().simulation_manager.get_slice_origin().get_steps() + to ) % ( P_.deliver_interval_ * nest::kernel().connection_manager.get_min_delay() ) == 0 ){
          double t_trig = nest::Time(nest::Time::step( nest::kernel().simulation_manager.get_slice_origin().get_steps() + to ) ).get_ms();
          if ( !B_.spikecounter_.empty() ){
-            nest::kernel().connection_manager.trigger_update_weight( get_gid(), B_.spikecounter_, t_trig );
+            //std::cout << P_.vt_num_ << " << P_.vt_num_ " << get_gid() << " << get_gid() " << std::endl; 
+            nest::kernel().connection_manager.trigger_update_weight(get_gid()-P_.vt_num_, B_.spikecounter_, t_trig );
 		}
          // clear spikecounter
          B_.spikecounter_.clear();
