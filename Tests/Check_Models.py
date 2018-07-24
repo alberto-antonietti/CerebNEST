@@ -3,6 +3,9 @@ import sys
 
 nest.Install("albertomodule")
 
+nest.set_verbosity('M_WARNING')
+nest.ResetKernel()
+
 VT = nest.Create("volume_transmitter_alberto", 1)
 
 CLOSED = nest.Create("closed_loop_neuron", 1)
