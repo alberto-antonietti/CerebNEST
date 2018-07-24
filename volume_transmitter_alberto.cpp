@@ -56,13 +56,13 @@ mynest::volume_transmitter_alberto::Parameters_::Parameters_()
 void
 mynest::volume_transmitter_alberto::Parameters_::get( DictionaryDatum& d ) const
 {
-  def< long >( d, "deliver_interval", deliver_interval_ );
+  def< long >( d, nest::names::deliver_interval, deliver_interval_ );
   def< long >( d, "vt_num", vt_num_ );
 }
 
 void mynest::volume_transmitter_alberto::Parameters_::set( const DictionaryDatum& d )
 {
-  updateValue< long >( d, "deliver_interval", deliver_interval_ );
+  updateValue< long >( d, nest::names::deliver_interval, deliver_interval_ );
   updateValue< long >( d, "vt_num", vt_num_ );
 }
 

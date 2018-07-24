@@ -64,7 +64,6 @@ STDPSinExpCommonProperties::get_status( DictionaryDatum& d ) const
   {
     def< long >( d, nest::names::vt, vtC_->get_gid() );
   }
-
   else
   {
     def< long >( d, nest::names::vt, -1 );
@@ -98,4 +97,18 @@ STDPSinExpCommonProperties::set_status( const DictionaryDatum& d,
   updateValue< double >( d, nest::names::Wmax, Wmax_ );
 }
 
-} // End of namespace mynest
+nest::Node*
+STDPSinExpCommonProperties::get_node()
+{
+  if ( vtC_ == 0 )
+  {
+    throw nest::BadProperty(
+      "No volume transmitter has been assigned to the dopamine synapse." );
+  }
+  else
+  {
+    return vtC_;
+  }
+}
+
+} // of namespace mynest
