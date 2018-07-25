@@ -62,17 +62,17 @@ STDPSinExpCommonProperties::get_status( DictionaryDatum& d ) const
   nest::CommonSynapseProperties::get_status( d );
   if ( vtC_ != 0 )
   {
-    def< long >( d, nest::names::vt, vtC_->get_gid() );
+    def< long >( d, "vt", vtC_->get_gid() );
   }
 
   else
   {
-    def< long >( d, nest::names::vt, -1 );
+    def< long >( d, "vt", -1 );
   }
-  def< double >( d, nest::names::A_plus, A_plus_ );
-  def< double >( d, nest::names::A_minus, A_minus_ );
-  def< double >( d, nest::names::Wmin, Wmin_ );
-  def< double >( d, nest::names::Wmax, Wmax_ );
+  def< double >( d, "A_plus", A_plus_ );
+  def< double >( d, "A_minus", A_minus_ );
+  def< double >( d, "Wmin", Wmin_ );
+  def< double >( d, "Wmax", Wmax_ );
 }
 
 void
@@ -82,7 +82,7 @@ STDPSinExpCommonProperties::set_status( const DictionaryDatum& d,
   nest::CommonSynapseProperties::set_status( d, cm );
 
   long vtgid;
-  if ( updateValue< long >( d, nest::names::vt, vtgid ) )
+  if ( updateValue< long >( d, "vt", vtgid ) )
   {
     vtC_ = dynamic_cast< volume_transmitter_alberto* >( nest::kernel().node_manager.get_node(
       vtgid, nest::kernel().vp_manager.get_thread_id() ) );
@@ -92,10 +92,10 @@ STDPSinExpCommonProperties::set_status( const DictionaryDatum& d,
     }
   }
 
-  updateValue< double >( d, nest::names::A_plus, A_plus_ );
-  updateValue< double >( d, nest::names::A_minus, A_minus_ );
-  updateValue< double >( d, nest::names::Wmin, Wmin_ );
-  updateValue< double >( d, nest::names::Wmax, Wmax_ );
+  updateValue< double >( d, "A_plus", A_plus_ );
+  updateValue< double >( d, "A_minus", A_minus_ );
+  updateValue< double >( d, "Wmin", Wmin_ );
+  updateValue< double >( d, "Wmax", Wmax_ );
 }
 
 } // End of namespace mynest

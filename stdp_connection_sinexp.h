@@ -137,7 +137,7 @@ public:
 
   void set_status( const DictionaryDatum& d, nest::ConnectorModel& cm );
 
-  void send( nest::Event& e, nest::thread t, const STDPSinExpCommonProperties& cp );
+  void send( nest::Event& e, nest::thread t, double,  const STDPSinExpCommonProperties& cp );
 
   void trigger_update_weight( nest::thread t, const std::vector< nest::spikecounter >& dopa_spikes, double t_trig, const STDPSinExpCommonProperties& cp );
 
@@ -169,7 +169,7 @@ public:
    * \param receptor_type The ID of the requested receptor type
    */
 
-  void check_connection( nest::Node& s, nest::Node& t, nest::rport receptor_type, const CommonPropertiesType& cp ){
+  void check_connection( nest::Node& s, nest::Node& t, nest::rport receptor_type, double t_lastspike, const CommonPropertiesType& cp ){
 	  
     ConnTestDummyNode dummy_target;
     ConnectionBase::check_connection_( dummy_target, s, t, receptor_type );
@@ -262,7 +262,7 @@ template < typename targetidentifierT > void STDPSinExpConnection< targetidentif
   updateValue< double >( d, nest::names::weight, weight_ );
   updateValue< long >( d, "vt_num", vt_num_ );
   long vtgid;
-  if ( updateValue< long >( d, nest::names::vt, vtgid ) )
+  if ( updateValue< long >( d, "vt", vtgid ) )
   {
     vt_ = dynamic_cast< volume_transmitter_alberto* >( nest::kernel().node_manager.get_node( vtgid ) );
     if ( vt_ == 0 )
@@ -319,7 +319,7 @@ template < typename targetidentifierT > inline void STDPSinExpConnection< target
  * \param e The event to send
  * \param p The port under which this connection is stored in the Connector.
  */
-template < typename targetidentifierT > inline void STDPSinExpConnection< targetidentifierT >::send( nest::Event& e, nest::thread t, const STDPSinExpCommonProperties& cp ){
+template < typename targetidentifierT > inline void STDPSinExpConnection< targetidentifierT >::send( nest::Event& e, nest::thread t, double, const STDPSinExpCommonProperties& cp ){
 
   nest::Node* target = get_target( t );
 
