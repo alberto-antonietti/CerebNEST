@@ -331,7 +331,7 @@ template < typename targetidentifierT > inline void STDPSinExpConnection< target
   double t_spike_d = t_spike;
   SpikeBuffer_.push_back(t_spike_d);
   update_weight_(cp.A_plus_, cp);
-  while(SpikeBuffer_[0]<t_spike-200.0)
+  while(SpikeBuffer_[0]<t_spike-300.0)
         {
 	 SpikeBuffer_.erase(SpikeBuffer_.begin());
 	 }
