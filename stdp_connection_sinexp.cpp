@@ -98,7 +98,7 @@ STDPSinExpCommonProperties::set_status( const DictionaryDatum& d,
   updateValue< double >( d, "A_minus", A_minus_ );
   updateValue< double >( d, "Wmin", Wmin_ );
   updateValue< double >( d, "Wmax", Wmax_ );
-  updateValue< double >( d, "delay", Delay);
+  updateValue< double >( d, "delay", Delay_ );
 }
 
 } // End of namespace mynest
