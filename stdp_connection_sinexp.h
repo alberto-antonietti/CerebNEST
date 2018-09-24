@@ -84,6 +84,7 @@ public:
   double Wmin_;
   double Wmax_;
   volume_transmitter_alberto* vtC_;
+  double Delay_;
 };
 
 inline long
@@ -285,9 +286,10 @@ template < typename targetidentifierT > inline void STDPSinExpConnection< target
     for(unsigned int GR = 0; GR<SpikeBuffer_.size(); GR++)
     {
       double sd= SpikeBuffer_[GR] - minus_dt;
-      if ( sd<0 && sd>=-200)
+      if ( sd<0 && sd>=-300)
       {
-        LTD_amount += cp.A_minus_ * exp(-(sd-150)/1000.0)*pow((sin(2*3.1415*(sd-150)/1000.0)),20)/1.2848;
+        double a = 251.26 - cp.Delay_;
+        LTD_amount += cp.A_minus_ * exp(-(sd-a)/1000.0)*pow((sin(2*3.1415*(sd-a)/1000.0)),20)/1.2856;
       }
     }
     update_weight_(LTD_amount, cp);
