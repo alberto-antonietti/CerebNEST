@@ -286,7 +286,7 @@ template < typename targetidentifierT > inline void STDPSinExpConnection< target
     for(unsigned int GR = 0; GR<SpikeBuffer_.size(); GR++)
     {
       double sd= SpikeBuffer_[GR] - minus_dt;
-      if ( sd<0 && sd>=-300)
+      if ( sd<min(0.0,-cp.Delay_+200.0) && sd>=max(-600.0,-cp.Delay_-200.0)
       {
         double a = 251.26 - cp.Delay_;
         LTD_amount += cp.A_minus_ * exp(-(sd-a)/1000.0)*pow((sin(2*3.1415*(sd-a)/1000.0)),20)/1.2856;
@@ -331,7 +331,7 @@ template < typename targetidentifierT > inline void STDPSinExpConnection< target
   double t_spike_d = t_spike;
   SpikeBuffer_.push_back(t_spike_d);
   update_weight_(cp.A_plus_, cp);
-  while(SpikeBuffer_[0]<t_spike-300.0)
+  while(SpikeBuffer_[0]<t_spike-800.0)
         {
 	 SpikeBuffer_.erase(SpikeBuffer_.begin());
 	 }
