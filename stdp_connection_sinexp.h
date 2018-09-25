@@ -286,7 +286,7 @@ template < typename targetidentifierT > inline void STDPSinExpConnection< target
     for(unsigned int GR = 0; GR<SpikeBuffer_.size(); GR++)
     {
       double sd= SpikeBuffer_[GR] - minus_dt;
-      if ( sd<min(0.0,-cp.Delay_+200.0) && sd>=max(-600.0,-cp.Delay_-200.0)
+      if ( sd<std::min(0.0,-cp.Delay_+200.0) && sd>=std::max(-600.0,-cp.Delay_-200.0) )
       {
         double a = 251.26 - cp.Delay_;
         LTD_amount += cp.A_minus_ * exp(-(sd-a)/1000.0)*pow((sin(2*3.1415*(sd-a)/1000.0)),20)/1.2856;
