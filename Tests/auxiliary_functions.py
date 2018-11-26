@@ -9,5 +9,4 @@ def toc():
         tempo = float(time.time()) - float(startTime_for_tictoc)
         print ("Elapsed time is %.3f seconds" % tempo)
     else:
-        print "Toc: start time not set"
-		
+        print("Toc: start time not set")

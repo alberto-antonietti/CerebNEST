@@ -113,12 +113,12 @@ Difference1 = SimResults1-Weight_Matrix
 # Get rid of approximation errors
 Difference1[np.where(np.bitwise_and(Difference1 < 1.01e-3, Difference1 > -1.01e-3 ))]=0.0
 Error1 = np.sum(Difference1)
-
+print(Error1)
 Difference4 = SimResults4-Weight_Matrix
 # Get rid of approximation errors
 Difference4[np.where(np.bitwise_and(Difference4 < 1.01e-3, Difference4 > -1.01e-3 ))]=0.0
 Error4 = np.sum(Difference4)
-
+print(Error4)
 Error = Error1 + Error4
 
 if Error == 0.0:
