@@ -33,8 +33,7 @@ nest.SetKernelStatus({'local_num_threads' : CORES,
                       'total_num_virtual_procs' : CORES,
                       'resolution' : 1.0,
                       'overwrite_files' : True})
-if CORES > 1:
-    nest.SetNumRecProcesses(1)
+
 msd = 1000 # master seed
 msdrange1 = range(msd, msd+CORES )
 pyrngs = [np.random.RandomState(s) for s in msdrange1]
@@ -76,7 +75,8 @@ if PLAST1:
     vt=nest.Create("volume_transmitter_alberto",PC_number)
     for n,vti in enumerate(vt):
         nest.SetStatus([vti],{"vt_num" : n})
-    
+
+        
 # Connection 0
 nest.Connect(InputGen,GR,"one_to_one",{"model": "static_synapse",
                                        "weight": 1.0,
@@ -107,11 +107,13 @@ if PLAST1:
                                                                                                 })	
     PFPC_conn_param = {"model":  'stdp_synapse_sinexp',
                        "weight": Init_PFPC,
-                       "delay":  1.0,
+                       "delay":  1.0
                        }
     nest.Connect(GR,PC,{'rule': "fixed_indegree", 'indegree':65600, "multapses": False, "autapses": False},PFPC_conn_param)
     for n,PCi in enumerate(PC):
-        A=nest.GetConnections(GR,[PCi])
+        print(n)
+        A=nest.GetConnections(source=GR,target=[PCi])
+        print("got connections")
         nest.SetStatus(A,{'vt_num': n})
 
 else:
