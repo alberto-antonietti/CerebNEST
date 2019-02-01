@@ -45,6 +45,8 @@ set( MODULE_SOURCES
     radial_basis_function_input.h radial_basis_function_input.cpp
     stdp_connection_cosexp.h stdp_connection_cosexp.cpp
     stdp_connection_sinexp.h stdp_connection_sinexp.cpp
+    iSTDP.h
+    Sgritta2017.h
     mynames.h mynames.cpp
     )
 
