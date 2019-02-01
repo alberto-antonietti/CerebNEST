@@ -137,7 +137,7 @@ public:
 
   void set_status( const DictionaryDatum& d, nest::ConnectorModel& cm );
 
-  void send( nest::Event& e, nest::thread t, const STDPSinExpCommonProperties& cp );
+  void send( nest::Event& e, nest::thread t, double, const STDPSinExpCommonProperties& cp );
 
   void trigger_update_weight( nest::thread t, const std::vector< nest::spikecounter >& dopa_spikes, double t_trig, const STDPSinExpCommonProperties& cp );
 
@@ -167,14 +167,14 @@ public:
    * \param s The source node
    * \param r The target node
    * \param receptor_type The ID of the requested receptor type
+   * \param t_lastspike last spike produced by presynaptic neuron (in ms)
    */
+  void check_connection( nest::Node& s, nest::Node& t, nest::rport receptor_type, double t_lastspike, const CommonPropertiesType& cp ){
 
-  void check_connection( nest::Node& s, nest::Node& t, nest::rport receptor_type, const CommonPropertiesType& cp ){
-	  
     ConnTestDummyNode dummy_target;
     ConnectionBase::check_connection_( dummy_target, s, t, receptor_type );
 
-    t.register_stdp_connection( t_lastspike_ - get_delay() );
+    t.register_stdp_connection( t_lastspike - get_delay() );
   }
 
   void set_weight( double w ){
@@ -205,7 +205,6 @@ private:
 
   // time of last update, which is either time of last presyn. spike or time-driven update
   double t_last_update_;
-  double t_lastspike_;
 };
 
 //
@@ -219,7 +218,6 @@ template < typename targetidentifierT > STDPSinExpConnection< targetidentifierT 
   , dopa_spikes_idx_( 0 )
   , t_last_update_( 0.0 )
   , vt_num_ ( 0 )
-  , t_lastspike_( 0.0 )
 {
 }
 
@@ -229,8 +227,7 @@ template < typename targetidentifierT > STDPSinExpConnection< targetidentifierT 
   , weight_( rhs.weight_ )
   , dopa_spikes_idx_( rhs.dopa_spikes_idx_ )
   , t_last_update_( rhs.t_last_update_ )
-  , vt_num_ ( rhs.vt_num_ )
-  , t_lastspike_( rhs.t_lastspike_ )
+  , vt_num_ ( 0 )
 {
 }
 
@@ -318,8 +315,10 @@ template < typename targetidentifierT > inline void STDPSinExpConnection< target
  * Send an event to the receiver of this connection.
  * \param e The event to send
  * \param p The port under which this connection is stored in the Connector.
+ * \param t_lastspike Time point of last spike emitted
  */
-template < typename targetidentifierT > inline void STDPSinExpConnection< targetidentifierT >::send( nest::Event& e, nest::thread t, const STDPSinExpCommonProperties& cp ){
+template < typename targetidentifierT > inline void STDPSinExpConnection< targetidentifierT >::send( nest::Event& e, nest::thread t, double, const STDPSinExpCommonProperties& cp ){
+  // t_lastspike_ = 0 initially
 
   nest::Node* target = get_target( t );
 
