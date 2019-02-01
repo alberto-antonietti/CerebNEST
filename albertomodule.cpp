@@ -31,7 +31,8 @@
 #include "closed_loop_neuron.h"
 #include "stdp_connection_sinexp.h"
 #include "stdp_connection_cosexp.h"
-
+#include "iSTDP.h"
+#include "Sgritta2017.h"
 
 // Includes from nestkernel:
 #include "connection_manager_impl.h"
@@ -142,5 +143,13 @@ mynest::AlbertoModule::init( SLIInterpreter* i )
   nest::kernel()
     .model_manager.register_connection_model< STDPCosExpConnection< nest::
         TargetIdentifierPtrRport > >( "stdp_synapse_cosexp" );
+
+  nest::kernel()
+    .model_manager.register_connection_model< iSTDP< nest::
+        TargetIdentifierPtrRport > >( "istdp_synapse" );
+
+  nest::kernel()
+    .model_manager.register_connection_model< Sgritta2017< nest::
+        TargetIdentifierPtrRport > >( "sgritta_synapse" );
 
 } // AlbertoModule::init()
