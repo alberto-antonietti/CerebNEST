@@ -194,7 +194,7 @@ private:
     if(w >= 0){
     norm_w = norm_w1 + w;}
     if(w < 0){
-    norm_w = -1*(norm_w1 + std::abs(w));}
+    norm_w = norm_w1 + w;}
     
 	//( w / Wmax_ )
      // + ( lambda_ * std::pow( 1.0 - ( w / Wmax_ ), mu_plus_ ) * kplus );

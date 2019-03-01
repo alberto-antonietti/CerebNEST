@@ -464,7 +464,13 @@ private:
     double norm_w = 0.0;
     double a = 0.0;
     if(Peak >= 1.0 && Peak <= 2.0){
-          norm_w = w - std::abs(alpha_*kplus*scaleFactor);	
+	if(w < 0){
+     		 norm_w = -1*(std::abs(w) - std::abs(alpha_*kplus*scaleFactor));
+         	  };
+	if(w >= 0){
+     	 	 norm_w = w - std::abs(alpha_*kplus*scaleFactor);
+	 	  };
+          	
      }
 
      if(Peak > 2.0){
