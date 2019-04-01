@@ -465,20 +465,20 @@ private:
     double a = 0.0;
     if(Peak >= 1.0 && Peak <= 2.0){
 	if(w < 0){
-     		 norm_w = -1*(std::abs(w) - std::abs(alpha_*kplus*scaleFactor));
+     		 norm_w = -1*(std::abs(w) - std::abs(w*alpha_*kplus*scaleFactor));
          	  };
 	if(w >= 0){
-     	 	 norm_w = w - std::abs(alpha_*kplus*scaleFactor);
+     	 	 norm_w = w - std::abs(w*alpha_*kplus*scaleFactor);
 	 	  };
           	
      }
 
      if(Peak > 2.0){
 	if(w < 0){
-     	 norm_w = -1*(std::abs(w) + (alpha_*kplus*scaleFactor));
+     	 norm_w = -1*(std::abs(w) + (w*alpha_*kplus*scaleFactor));
            };
 	if(w >= 0){
-     	 norm_w = w + (alpha_*kplus*scaleFactor);
+     	 norm_w = w + (w*alpha_*kplus*scaleFactor);
 	   };
       
      }
