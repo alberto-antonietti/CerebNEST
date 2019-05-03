@@ -23,54 +23,14 @@
 #ifndef SGRITTA2017_H
 #define SGRITTA2017_H
 
-/* BeginDocumentation
-  Name: stdp_synapse - Synapse type for spike-timing dependent
-   plasticity.
+ /*
 
-  Description:
-   stdp_synapse is a connector to create synapses with spike time
-   dependent plasticity (as defined in [1]). Here the weight dependence
-   exponent can be set separately for potentiation and depression.
+   Vasco Orza and Alberto Antonietti
+   alberto.antonietti@polimi.it
 
-  Examples:
-   multiplicative STDP [2]  mu_plus = mu_minus = 1.0
-   additive STDP       [3]  mu_plus = mu_minus = 0.0
-   Guetig STDP         [1]  mu_plus = mu_minus = [0.0,1.0]
-   van Rossum STDP     [4]  mu_plus = 0.0 mu_minus = 1.0
+   Cerebellar MF-GrC Plasticity with STDP + Frequency dependency
 
-  Parameters:
-   tau_plus   double - Time constant of STDP window, potentiation in ms
-                       (tau_minus defined in post-synaptic neuron)
-   lambda     double - Step size
-   alpha      double - Asymmetry parameter (scales depressing increments as
-                       alpha*lambda)
-   mu_plus    double - Weight dependence exponent, potentiation
-   mu_minus   double - Weight dependence exponent, depression
-   Wmax       double - Maximum allowed weight
-
-  Transmits: SpikeEvent
-
-  References:
-   [1] Guetig et al. (2003) Learning Input Correlations through Nonlinear
-       Temporally Asymmetric Hebbian Plasticity. Journal of Neuroscience
-
-   [2] Rubin, J., Lee, D. and Sompolinsky, H. (2001). Equilibrium
-       properties of temporally asymmetric Hebbian plasticity, PRL
-       86,364-367
-
-   [3] Song, S., Miller, K. D. and Abbott, L. F. (2000). Competitive
-       Hebbian learning through spike-timing-dependent synaptic
-       plasticity,Nature Neuroscience 3:9,919--926
-
-   [4] van Rossum, M. C. W., Bi, G-Q and Turrigiano, G. G. (2000).
-       Stable Hebbian learning from spike timing-dependent
-       plasticity, Journal of Neuroscience, 20:23,8812--8821
-
-  FirstVersion: March 2006
-  Author: Moritz Helias, Abigail Morrison
-  Adapted by: Philipp Weidel
-  SeeAlso: synapsedict, tsodyks_synapse, static_synapse
-*/
+ */
 
 // C++ includes:
 #include <cmath>
@@ -91,9 +51,6 @@
 #include "dictutils.h"
 
 std::ofstream amp_;
-
-//double * Window = new  double[(int)((W*1000)/resolution + 0.5)];
-//double * Tempo = new  double[(int)((W*1000)/resolution + 0.5)];
 //std::ofstream OutputFile_;
 //std::ofstream freq_;
 
@@ -155,7 +112,6 @@ public:
    */
   void send( nest::Event& e,
     nest::thread t,
-    double t_lastspike,
     const nest::CommonSynapseProperties& cp );
 
   
@@ -176,15 +132,14 @@ public:
   void
   check_connection( nest::Node& s,
     nest::Node& t,
-   nest::rport receptor_type,
-    double t_lastspike,
+    nest::rport receptor_type,
     const CommonPropertiesType& )
   {
     ConnTestDummyNode dummy_target;
 
     ConnectionBase::check_connection_( dummy_target, s, t, receptor_type );
 
-    t.register_stdp_connection( t_lastspike - get_delay() );
+    t.register_stdp_connection( t_lastspike_ - get_delay(), get_delay() );
   }
 
   void
@@ -195,25 +150,31 @@ public:
 
 private:
 
- double CalculateMultiplier(double Fpeak){
+  double
+  CalculateMultiplier( double Fpeak )
+  {
     double multiplier;
-    if(Fpeak < 1 || Fpeak > 10){
+    if ( Fpeak < 1 || Fpeak > 10 )
+    {
       multiplier = 0;
     }
 
-    if(Fpeak <= 6 && Fpeak >= 1){
+    if ( Fpeak <= 6 && Fpeak >= 1 )
+    {
       multiplier = 0.308*Fpeak - 0.848;
     }
     
-    if(Fpeak > 6 && Fpeak <= 10){
+    if ( Fpeak > 6 && Fpeak <= 10 )
+    {
       multiplier = -0.115 * Fpeak + 1.69;
     }
 
-    return(multiplier);
+    return multiplier;
   }
      
- double FindPeaks(double perc){
-
+  double
+  FindPeaks( double perc )
+  {
     std::vector<double> DummyFreq;
     std::vector<double> DummyAmp;
     std::vector<double>::iterator found;
@@ -224,237 +185,232 @@ private:
     double m;
     int index_m;
     double f;
-    for(int i = 0; i<W_int;i++){
-
-        if(Frequencies[i] <100){
-           DummyAmp.push_back(Amplitudes[i]);
-           //std::cout << i << std::endl;
-         }
-     }
+    for (int i = 0; i<W_int;i++)
+    {
+      if (Frequencies[ i ] <100)
+      {
+        DummyAmp.push_back(Amplitudes[ i ]);
+        //std::cout << i << std::endl;
+      }
+    }
 
     max = std::max_element(DummyAmp.begin(),DummyAmp.end());
     
     m = *max;
-    /*
-    thr = m * perc;
 
-    while(flag){
-        max = std::max_element(DummyAmp.begin(), DummyAmp.end());
-        m = *max;
-        found = std::find(DummyAmp.begin(), DummyAmp.end(), m);
-        index_m = distance(DummyAmp.begin(), found);
-
-        for(int i = 0; i<= index_m; i++){
-        DummyAmp[i] = 0.0;
-          }
-        f = Frequencies[index_m];
-        if(m >= thr){ 
-	    DummyFreq.push_back(f);
-           }
-
-         if(m < thr){ 
-	    flag = 0;
-           }
-
-        count++;
-    }
-     */
     found = std::find(DummyAmp.begin(), DummyAmp.end(), m);
     index_m = distance(DummyAmp.begin(), found);
 
-    return(Frequencies[index_m]);
-
-   }
-  
-
+    return Frequencies[ index_m ];
+  }
  
- void four1(void)
-	{
-	    unsigned long n = 0, mmax  = 0, m  = 0, j  = 0, istep  = 0, i  = 0;
-	    double wtemp = 0.0, wr = 0.0, wpr = 0.0, wpi = 0.0, wi = 0.0, theta = 0.0;
-	    double tempr = 0.0, tempi= 0.0;
-	    
-	    // reverse-binary reindexing
-	    n = W_int<<1;
-	    j=1;
-            
-	    for (i=1; i<n; i+=2) {
-		if (j>i) {
-		    std::swap(Doppio[j-1], Doppio[i-1]);
-		    std::swap(Doppio[j], Doppio[i]);
-		}
-		m = W_int;
-		while (m>=2 && j>m) {
-		    j -= m;
-		    m >>= 1;
-		}
-		j += m;
-	    };
-	 
-	    // here begins the Danielson-Lanczos section
-	    mmax=2;
+  void
+  four1( void )
+  {
+    unsigned long n = 0, mmax = 0, m = 0, j = 0, istep = 0, i = 0;
+    double wtemp = 0.0, wr = 0.0, wpr = 0.0, wpi = 0.0, wi = 0.0, theta = 0.0;
+    double tempr = 0.0, tempi = 0.0;
+    // reverse-binary reindexing
+    n = W_int << 1;
+    j = 1;
 
-	    while (n/2>mmax) {
-		istep = mmax<<1;
-		theta = -(2*M_PI/mmax);
-		wtemp = sin(0.5*theta);
-		wpr = -2.0*wtemp*wtemp;
-		wpi = sin(theta);
-		wr = 1.0;
-		wi = 0.0;
-		for (m=1; m < mmax; m += 2) {
-		    for (i=m; i <= n; i += istep) {
-		        j=i+mmax;
-		        tempr = wr*Doppio[j-1] - wi*Doppio[j];
-		        tempi = wr * Doppio[j] + wi*Doppio[j-1];
-
-		        Doppio[j-1] = Doppio[i-1] - tempr;
-		        Doppio[j] = Doppio[i] - tempi;
-		        Doppio[i-1] += tempr;
-		        Doppio[i] += tempi;
-			
-
-		    }
-		    wtemp=wr;
-		    wr += wr*wpr - wi*wpi;
-		    wi += wi*wpr + wtemp*wpi;
-		}
-		mmax=istep;
-	    }
-
-         
-    //std::cout << wpi << " " << wpr  << " " << theta << " " << wtemp << " "  << tempr << " " << tempi  << " " << wr << " " << wi << " "<< istep<<std::endl;
-
-
-	}
-
-     
-
-
-   void CalculateA(void){
-       double sq_sum;
-       double sq_root;
-       int j = 0;
-
-       for(int i = 0; i < W_int; i++){
-             Amplitudes[i] = 0;
-             }
-
-       for(int i=0; i<W_int*2; i = i + 2){
-          sq_sum = std::pow(Doppio[i], 2) + std::pow(Doppio[i + 1], 2);
-          sq_root = std::sqrt(sq_sum);
-          Amplitudes[j] = sq_root;
-          j++;
-         }
-
-       for(int i = 0; i < W_int; i++){
-         if(Frequencies[i] < 1){
-             Amplitudes[i] = 0;
-             }
-       }
-	//std::cout << W_int << std::endl;
-        // for(int i = 0; i < W_int; i++){
-          // OutputFile_<< Amplitudes[i] << std::endl;}
-
-    }
-
-   void InstantFreq(double t2, double t1, int P, double A)
-      {
-      //double A = window[624];
-      double b = resolution/1000;
-      double dT = (t2 - t1)/1000;
-      double div = resolution/1000;
-      int len = (int)(dT/div + 0.5);
-     // std::cout << P << std::endl;
-      if (P+1<0 || P+len>=W_int)
-                   std::cout << " CHECK7 FAIL " << std::endl;
-      for(int i = P + 1; i <= P+len; i++){
-         Window[i] = A * std::exp(-1.0*b/0.25);
-         //OutputFile_ << Window[i] << std::endl ;
-         b = b + div;
-         }
-
-      Window[P+len] = Window[P+len] + 4.0;
-
-      //std::cout << dT << " " << len << " " << t1/1000 << " " << t2/1000 << std::endl;
-      //std::cout << Window[P+len] << " " << P + len << " " << P <<std::endl;
-       }
-
-   void MoveWindow(double dT, double posOld, int flagM)
+    for ( i = 1; i < n; i += 2 )
     {
-     if(flagM == 1 || posOld >= W_int){
-        posOld = W_int - 1;}
-
-     int step = dT-((W_int - 1) - posOld); // (w-1) index of last element of window 
-    // std::cout << posOld << std::endl;
-     //std::cout << posOld << std::endl;
-     if (step<0 || posOld>=W_int)
-          std::cout << " CHECK6 FAIL " << " " << step << " " << posOld <<std::endl;
-     for(int i = step; i <= posOld; i++)
-       {
-         Window[i - step] = Window[i];
-        }
- 
+      if ( j > i )
+      {
+        std::swap( Doppio[ j-1 ], Doppio[ i-1 ] );
+        std::swap( Doppio[ j ], Doppio[ i ] );
+      }
+      m = W_int;
+      while ( m >= 2 && j > m )
+      {
+        j -= m;
+        m >>= 1;
+      }
+      j += m;
     }
+ 
+    // here begins the Danielson-Lanczos section
+    mmax=2;
+    while( n/2 > mmax )
+    {
+      istep = mmax << 1;
+      theta = -(2*M_PI/mmax);
+      wtemp = sin(0.5*theta);
+      wpr = -2.0*wtemp*wtemp;
+      wpi = sin( theta );
+      wr = 1.0;
+      wi = 0.0;
+      for ( m = 1; m < mmax; m += 2 )
+      {
+        for ( i = m; i <= n; i += istep)
+        {
+            j = i+mmax;
+            tempr = wr*Doppio[ j-1 ] - wi*Doppio[ j ];
+            tempi = wr * Doppio[ j ] + wi*Doppio[ j-1 ];
+
+            Doppio[ j-1 ] = Doppio[ i-1 ] - tempr;
+            Doppio[ j ] = Doppio[ i ] - tempi;
+            Doppio[ i-1 ] += tempr;
+            Doppio[ i ] += tempi;
+        }
+        wtemp = wr;
+        wr += wr*wpr - wi*wpi;
+        wi += wi*wpr + wtemp*wpi;
+      }
+      mmax = istep;
+    }  
+  //std::cout << wpi << " " << wpr  << " " << theta << " " << wtemp << " "  << tempr << " " << tempi  << " " << wr << " " << wi << " "<< istep<<std::endl;
+  }
+
+  void
+  CalculateA( void )
+  {
+    double sq_sum;
+    double sq_root;
+    int j = 0;
+
+    for ( int i = 0; i < W_int; i++ )
+    {
+      Amplitudes[ i ] = 0;
+    }
+    
+    for ( int i = 0; i < W_int * 2; i = i + 2 )
+    {
+      sq_sum = std::pow( Doppio[ i ], 2) + std::pow(Doppio[ i + 1 ], 2 );
+      sq_root = std::sqrt(sq_sum);
+      Amplitudes[ j ] = sq_root;
+      j++;
+    }
+
+    for ( int i = 0; i < W_int; i++ )
+    {
+    if (Frequencies[ i ] < 1)
+      {
+        Amplitudes[ i ] = 0;
+      }
+    }
+    //std::cout << W_int << std::endl;
+    //for (int i = 0; i < W_int; i++)
+    //{
+    //  OutputFile_<< Amplitudes[ i ] << std::endl;
+    //}
+  }
+
+  void
+  InstantFreq( double t2, double t1, int P, double A )
+  {
+    double b = resolution / 1000.0;
+    double dT = (t2 - t1) / 1000.0;
+    double div = resolution / 1000.0;
+    int len = (int)( dT/div + 0.5 );
+    // std::cout << P << std::endl;
+    if ( P + 1 < 0 || P + len >= W_int )
+    {
+      std::cout << " CHECK7 FAIL " << std::endl;
+    }
+    
+    for ( int i = P + 1; i <= P + len; i++ )
+    {
+      Window[ i ] = A * std::exp( -1.0 * b / 0.25 );
+      //OutputFile_ << Window[ i ] << std::endl ;
+      b = b + div;
+    }
+
+    Window[ P+len ] = Window[ P+len ] + 4.0;
+    //std::cout << dT << " " << len << " " << t1/1000 << " " << t2/1000 << std::endl;
+    //std::cout << Window[ P+len ] << " " << P + len << " " << P <<std::endl;
+  }
+
+  void
+  MoveWindow( double dT, double posOld, int flagM )
+  {
+    if ( flagM == 1 || posOld >= W_int )
+    {
+      posOld = W_int - 1;
+    }
+
+    int step = dT - ( ( W_int - 1 ) - posOld );
+    //std::cout << posOld << std::endl;
+    //std::cout << posOld << std::endl;
+    if (step<0 || posOld>=W_int)
+    {
+      std::cout << " CHECK6 FAIL " << " " << step << " " << posOld <<std::endl;
+    }
+    for ( int i = step; i <= posOld; i++ )
+    {
+      Window[ i - step ] = Window[ i ];
+    }
+
+  }
 
    
-   void Inizializza(void){
-        double b = 0.0;
-        double stepFreq;
-        stepFreq = (1000/resolution)/W_int;
+  void
+  Inizializza(void)
+  {
+    double b = 0.0;
+    double stepFreq;
+    stepFreq = ( 1000.0 / resolution ) / W_int;
 
-        for(int i = 0; i < W_int; i++){  
-            Window.push_back(0.0);
-            Amplitudes.push_back(0.0);       
-            Frequencies.push_back(b);
-	    b = b + stepFreq; 
-
-        }
-       // for(int i = 0; i < W_int; i++){
-          //  freq_ << Frequencies[i] << std::endl;}
-   }   
+    for ( int i = 0; i < W_int; i++ )
+    {  
+      Window.push_back( 0.0 );
+      Amplitudes.push_back( 0.0 );
+      Frequencies.push_back( b );
+      b = b + stepFreq; 
+    }
+    //for (int i = 0; i < W_int; i++)
+    //{
+    //  freq_ << Frequencies[ i ] << std::endl;
+    //}
+  }
 
     
-   void Duplica(int flag){
-
-     int j = 0;
-     if(flag == 0){
-        for(int i = 0; i < W_int*2; i++){
-           if(i %2 == 0){
-             Doppio.push_back(Window[j]);
-             j++;
-              //std::cout << j << std::endl;
-             
-           }
-           else if(i %2 != 0){
-             Doppio.push_back(0.0);
-           }
-         
+  void
+  Duplica( int flag )
+  {
+    int j = 0;
+    if ( flag == 0 )
+    {
+      for ( int i = 0; i < W_int * 2; i++ )
+      {
+        if ( i % 2 == 0 )
+        {
+          Doppio.push_back( Window[ j ] );
+          j++;
+          //std::cout << j << std::endl;
         }
-
+        else if ( i % 2 != 0 )
+        {
+          Doppio.push_back(0.0);
+        }
       }
-     if(flag != 0){
-       for(int i = 0; i < W_int*2; i++){
-           if(i %2 == 0){
-             Doppio[i] = Window[j];
-             j++;
-              //std::cout << j << std::endl;
-             
-           }
-           else if(i %2 != 0){
-             Doppio[i] = 0.0;
-           }
-         
+    }
+    
+    if ( flag != 0 )
+    {
+      for (int i = 0; i < W_int * 2; i++ )
+      {
+        if ( i % 2 == 0 )
+        {
+          Doppio[ i ] = Window[ j ];
+          j++;
+          //std::cout << j << std::endl;
         }
-     }
-   }  
+        else if ( i % 2 != 0 )
+        {
+          Doppio[ i ] = 0.0;
+        }
+      }
+    }
+  }
 
   double
-  calculate_k_(double dt)
+  calculate_k_( double dt )
   {
-    double k = 2.0*std::pow(sin(2*M_PI*dt*0.01), 5)*std::exp(-1*std::abs(0.0587701241739 *dt));
-  // std::cout << k << std::endl;
-   
+    double k = 2.0 * std::pow( sin( 2 * M_PI * dt * 0.01 ), 5 ) *
+      std::exp( -1 * std::abs( 0.0587701241739 *dt ) );
+    //std::cout << k << std::endl;
     return k; 
   }
 
@@ -463,36 +419,32 @@ private:
   {
     double norm_w = 0.0;
     double a = 0.0;
-    if(Peak >= 1.0 && Peak <= 2.0){
-	if(w < 0){
-     		 norm_w = -1*(std::abs(w) - std::abs(w*alpha_*kplus*scaleFactor));
-         	  };
-	if(w >= 0){
-     	 	 norm_w = w - std::abs(w*alpha_*kplus*scaleFactor);
-	 	  };
-          	
-     }
+    if ( Peak >= 1.0 && Peak <= 2.75 ) // Only LTD if Peak between 1 and 2.75 Hz
+    {
+      if ( w < 0 )
+      {
+        norm_w = -1*( std::abs( w ) - std::abs( w * alpha_ * kplus * scaleFactor ) );
+      }
+      else if ( w >= 0 )
+      {
+        norm_w = w - std::abs( w * alpha_ * kplus * scaleFactor );
+      }
+    }
 
-     if(Peak > 2.0){
-	if(w < 0){
-     	 norm_w = -1*(std::abs(w) + (w*alpha_*kplus*scaleFactor));
-           };
-	if(w >= 0){
-     	 norm_w = w + (w*alpha_*kplus*scaleFactor);
-	   };
-      
-     }
-   // std::cout << norm_w << std::endl;
+    if ( Peak > 2.75 ) // Both LTP and LTD
+    {
+      if ( w < 0 )
+      {
+        norm_w = -1*( std::abs( w ) + ( w * alpha_ * kplus * scaleFactor ) );
+      }
+      else if ( w >= 0 )
+      {
+        norm_w = w + ( w * alpha_ * kplus * scaleFactor );
+      }
+    }
+    // std::cout << norm_w << std::endl;
     return norm_w;
   }
-
- // double
-  //depress_( double w, double kminus )
-  //{
-    //double norm_w = ( w / Wmax_ )
-      //- ( alpha_ * lambda_ * std::pow( w / Wmax_, mu_minus_ ) * kminus );
-   // return norm_w > 0.0 ? norm_w * Wmax_ : 0.0;
-  //}
 
   // data members of each connection
   double weight_;
@@ -524,193 +476,179 @@ private:
   std::vector<double> Frequencies;
   std::vector<double> Doppio;
   std::vector<double> Amplitudes;
+  double t_lastspike_;
 
 
-  };
+};
 
 
 /**
  * Send an event to the receiver of this connection.
  * \param e The event to send
  * \param t The thread on which this connection is stored.
- * \param t_lastspike Time point of last spike emitted
+ * \param t_lastspike_ Time point of last spike emitted
  * \param cp Common properties object, containing the stdp parameters.
  */
 template < typename targetidentifierT >
 inline void
 Sgritta2017< targetidentifierT >::send( nest::Event& e,
   nest::thread t,
-  double t_lastspike,
   const nest::CommonSynapseProperties& )
 {
-  // synapse STDP depressing/facilitation dynamics
-  //   if(t_lastspike >0) {std::cout << "last spike " << t_lastspike <<
-  //   std::endl ;}
   double t_spike = e.get_stamp().get_ms();
-  // t_lastspike_ = 0 initially
-
   // use accessor functions (inherited from Connection< >) to obtain delay and
   // target
   nest::Node* target = get_target( t );
 
   double dendritic_delay = get_delay();
 
-  // get spike history in relevant range (t1, t2] from post-synaptic neuron
+  // get spike history in relevant range (t1, t2 ] from post-synaptic neuron
   std::deque< nest::histentry >::iterator start;
   std::deque< nest::histentry >::iterator finish;
 
   // For a new synapse, t_lastspike contains the point in time of the last
   // spike. So we initially read the
-  // history(t_last_spike - dendritic_delay, ..., T_spike-dendritic_delay]
+  // history(t_last_spike - dendritic_delay, ..., T_spike-dendritic_delay ]
   // which increases the access counter for these entries.
   // At registration, all entries' access counters of
-  // history[0, ..., t_last_spike - dendritic_delay] have been
+  // history[ 0, ..., t_last_spike - dendritic_delay ] have been
   // incremented by Archiving_Node::register_stdp_connection(). See bug #218 for
   // details.
   target->get_history(
-    t_lastspike - dendritic_delay, t_spike - dendritic_delay, &start, &finish );
-  // facilitation due to post-synaptic spikes since last pre-synaptic spike
+    t_lastspike_ - dendritic_delay, t_spike - dendritic_delay, &start, &finish );
 
- // 
 
-   W = mu_plus_;
-   W_int = (int) ((W*1000)/resolution + 0.5);
-   
-    
-
-    
-
+  W = mu_plus_;
+  W_int = (int) ( ( W * 1000 ) / resolution + 0.5 );
 
   while ( start != finish )
   {
-   //std::cout << start->t_ << "\t"<< t_lastspike << "\t" << t_spike  << std::endl;
-    //if(t_lastspike == 0){
-    
-  //  dtp_ = t_spike - (start ->t_);  
-  //  Kplus_ = calculate_k_(dtp_);
-   // weight_ = facilitate_( weight_, Kplus_, 1.0, 6.0);
-    
-      posF = (int) (t_spike/resolution + 0.5);
+    //std::cout << start->t_ << "\t"<< t_lastspike_ << "\t" << t_spike  << std::endl;
+    posF = (int) ( t_spike / resolution + 0.5 );
+    deltaT = (int)( ( t_spike - t_old ) / resolution + 0.5 );
+    //std::cout << t_spike << " pre"<< std::endl;
+    if ( pos_old + deltaT  > W_int - 1 && flag != 0 && deltaT < W_int )
+    {
+      // std::cout << t_spike << " IF1"<< std::endl; 
+      // std::cout << " MOVE PRE " << " " << deltaT << " " << pos_old << " " << flagMove << " " << std::endl;
+      MoveWindow(deltaT, pos_old, flagMove);
+      //std::cout << " MOVE POST "<< t << std::endl;
+      if ( flagMove != 0 )
+      {
+        // std::cout <<pos << " IF1"<< std::endl;
+        pos = W_int - 1 - deltaT;
+        if ( pos < 0 || pos >= W_int )
+        {
+          std::cout << " CHECK1 FAIL " << std::endl;
+        }
+        InstantFreq( t_spike, t_old, pos, Window[ pos ] );
+        Duplica( flagMove ); 
+        //std::cout << "target " << target->get_gid() << " " <<posF << " IF1"<< std::endl;
+        four1();
+        CalculateA();
+        peak = FindPeaks( mu_minus_ );
+        dtp_ = ( start ->t_ ) - t_spike;
+        Kplus_ = calculate_k_( dtp_ );
+        alpha = CalculateMultiplier( peak );
+        weight_ = facilitate_( weight_, Kplus_, alpha, peak );
+        dtn_ = ( start ->t_ ) - t_lastspike_;
+        Kplus_ = calculate_k_( dtn_ );
+        alpha = CalculateMultiplier( peak );
+        weight_ = facilitate_( weight_, Kplus_, alpha, peak );
+        //std::cout << "PRE" << std::endl;
+        if ( t == 0 )
+        {
+          amp_ << FindPeaks( mu_minus_ ) << "\t" ;
+          //std::cout << FindPeaks(mu_minus_) << std::endl;
+        }
+        if ( flagMove == 0 )
+        {
+          //std::cout << "target " << target->get_gid() << posF << " IF2"<< std::endl;
+          p = deltaT - ( ( W_int  - 1 ) - pos_old );
+          pos = pos_old - p;
+          if ( pos < 0 || pos >= W_int )
+          {
+            std::cout << " CHECK2 FAIL " << pos << std::endl;
+          }
+          InstantFreq( t_spike, t_old, pos, Window[ pos ]);
+          Duplica( flagMove);
+          four1();
+          CalculateA();
+          flagMove=1;
+          peak = FindPeaks( mu_minus_);
+          dtp_ = ( start ->t_ ) - t_spike;
+          Kplus_ = calculate_k_( dtp_ );
+          alpha = CalculateMultiplier( peak );
+          weight_ = facilitate_( weight_, Kplus_, alpha, peak );
+          dtn_ = ( start ->t_) - t_lastspike_ ; 
+          Kplus_ = calculate_k_( dtn_ );
+          alpha = CalculateMultiplier( peak );
+          weight_ = facilitate_( weight_, Kplus_, alpha, peak );
+          if ( t == 0 )
+          {
+            amp_ << FindPeaks( mu_minus_ ) << "\t";
+          }
+        }
+      }
+    }
+    else if ( pos_old + deltaT <= W_int - 1 && flag != 0 )
+    {
+      //std::cout << Window.size() << std::endl;
+      if ( pos_old < 0 || pos_old >= W_int )
+      {
+        std::cout << " CHECK3 FAIL " << std::endl;
+      }
+      InstantFreq( t_spike, t_old, pos_old, Window[ pos_old ] );
+    }
+    else if (flag == 0)
+    {
+      //OutputFile_.open( "OutputFile.dat" );
+      // freq_.open( "freq.dat" );
+      if (t == 0)
+      {
+        amp_.close();
+        amp_.open( "amp.dat", std::ofstream::app );
+      }
+      Inizializza();
+      posF =  posF % W_int;
+      //std::cout << posF << std::endl;
+      if (posF < 0 || posF >= W_int )
+      {
+        std::cout << " CHECK4 FAIL " << std::endl;
+      }
+      Window[ posF ] = 4.0; 
+      flag = 1;
+    }
+    t_old = t_spike;
+    pos_old = posF;
+
+    if ( t == 0 )
+    {
+      amp_.flush();
+    }
  
-      deltaT = (int)((t_spike - t_old)/resolution + 0.5);
-      //std::cout << t_spike << " pre"<< std::endl;                        
-      if((pos_old + deltaT) > W_int - 1 && flag != 0 && deltaT < W_int){
-         // std::cout << t_spike << " IF1"<< std::endl; 
-         // std::cout << " MOVE PRE " << " " << deltaT << " " << pos_old << " " << flagMove << " " << std::endl;                
-          MoveWindow(deltaT, pos_old, flagMove);
-          //std::cout << " MOVE POST "<< t << std::endl;
-          if(flagMove != 0){
-	      // std::cout <<pos << " IF1"<< std::endl;
-               pos = W_int - 1 - deltaT;
-	       if (pos<0 || pos>=W_int)
-                   std::cout << " CHECK1 FAIL " << std::endl;
-               InstantFreq(t_spike, t_old, pos, Window[pos]);           
-               Duplica(flagMove); 
-	       //std::cout << "target " << target->get_gid() << " " <<posF << " IF1"<< std::endl;
-               four1();
-               CalculateA();
-               peak = FindPeaks(mu_minus_);       
-               dtp_ = (start ->t_ ) - t_spike; 
-	       Kplus_ = calculate_k_(dtp_);
-	       alpha = CalculateMultiplier(peak);
-	       weight_ = facilitate_( weight_, Kplus_, alpha, peak);
-               dtn_ = (start ->t_) - t_lastspike;  
-               Kplus_ = calculate_k_(dtn_);
-               alpha = CalculateMultiplier(peak);
-               weight_ = facilitate_( weight_, Kplus_, alpha, peak);
-               //std::cout << "PRE" << std::endl;
-               if(t == 0){
-                   amp_ << FindPeaks(mu_minus_) << "\t" ;}
-               //std::cout << FindPeaks(mu_minus_) << std::endl;
-              }
-          if(flagMove == 0){
-		//std::cout << "target " << target->get_gid() << posF << " IF2"<< std::endl;
-                p = deltaT - ((W_int  - 1) - pos_old) ; 
-                pos = pos_old - p;        
-		if (pos<0 || pos>=W_int){
-                   std::cout << " CHECK2 FAIL " << pos << std::endl;
-                   }
-                InstantFreq(t_spike, t_old, pos, Window[pos]);
-                Duplica(flagMove);
-                four1();
-                CalculateA();
-                flagMove=1;
-                peak = FindPeaks(mu_minus_);
-                dtp_ = (start ->t_ ) - t_spike; 
-    		Kplus_ = calculate_k_(dtp_);
-    		alpha = CalculateMultiplier(peak);
-    		weight_ = facilitate_( weight_, Kplus_, alpha, peak);
-     	        dtn_ = (start ->t_) - t_lastspike ; 
-                Kplus_ = calculate_k_(dtn_);
-      	        alpha = CalculateMultiplier(peak);
-     	        weight_ = facilitate_( weight_, Kplus_, alpha, peak);
-                if(t == 0){
-                    amp_ << FindPeaks(mu_minus_) << "\t" ;  }
-                }
-
-      }
-         
-      else if(pos_old + deltaT <= W_int - 1 && flag != 0){
-	//std::cout << Window.size() << std::endl;
-          if (pos_old<0 || pos_old>=W_int)
-                   std::cout << " CHECK3 FAIL " << std::endl;  
-          InstantFreq(t_spike, t_old, pos_old, Window[pos_old]);
-      }
-        
-      if(flag == 0){
-         //OutputFile_.open( "OutputFile.dat" );
-       // freq_.open( "freq.dat" );
-	if(t == 0){
-          amp_.close();
-          amp_.open( "amp.dat", std::ofstream::app);}
-          Inizializza();        
-          posF =  posF%W_int;
-	//std::cout << posF << std::endl;
-          if (posF<0 || posF>=W_int)
-                   std::cout << " CHECK4 FAIL " << std::endl;
-          Window[posF] = 4.0; 
-          flag = 1;
-
-      }
-      t_old = t_spike;    
-      pos_old = posF;
-
-   // for (int i=0; i<W_int; i++)
-     //    std::cout << Window[i]<< " " ;
-       //  std::getchar();
-         //std::cout << std::endl;
-      
-        //OutputFile_.flush();
-	if(t == 0){
-        amp_.flush();}
-
-
-         
-       //ciclo if aggiustamento pesi
-
     start++; // lasciare in fonto qui se no va in vacca tutto il resto;
-   //std::cout << posF << std::endl;
-  }//ciclo while generale
-    
-	
-
-  // depression due to new pre-synaptic spike
- // weight_ =
-   // depress_( weight_, target->get_K_value( t_spike - dendritic_delay ) );
+    //std::cout << posF << std::endl;
+  }
 
   e.set_receiver( *target );
   if ( weight_ < Wmin_ )
+  {
     weight_ = Wmin_;
+  }
   if ( weight_ > Wmax_ )
+  {
     weight_ = Wmax_;
+  }
   e.set_weight( weight_ );
   // use accessor functions (inherited from Connection< >) to obtain delay in
   // steps and rport
-  e.set_delay( get_delay_steps() );
+  e.set_delay_steps( get_delay_steps() );
   e.set_rport( get_rport() );
   e();
   
-  
+  t_lastspike_ = t_spike;
+
 }
 
 
@@ -726,6 +664,7 @@ Sgritta2017< targetidentifierT >::Sgritta2017()
   , Wmax_( 100.0 )
   , Kplus_( 0.0 )
   , Wmin_(-100.0)
+  , t_lastspike_( 0.0 )
 {
 }
 
@@ -742,6 +681,7 @@ Sgritta2017< targetidentifierT >::Sgritta2017(
   , Wmax_( rhs.Wmax_ )
   , Wmin_( rhs.Wmin_ )
   , Kplus_( rhs.Kplus_ )
+  , t_lastspike_( rhs.t_lastspike_ )
 {
 }
 
@@ -780,10 +720,10 @@ Sgritta2017< targetidentifierT >::set_status( const DictionaryDatum& d,
   if ( not( ( ( weight_ >= 0 ) - ( weight_ < 0 ) )
          == ( ( Wmax_ >= 0 ) - ( Wmax_ < 0 ) ) ) )
   {
-    throw nest::BadProperty( "Weight aed Wmax must have same sign." );
+    throw nest::BadProperty( "Weight and Wmax must have the same sign." );
   }
 }
 
 } // of namespace nest
 
-#endif // of #ifndef SGRITTA2017_Hhttps://open.spotify.com/track/1mBMgkXH9n2SUQSB4LmihW
+#endif // of #ifndef SGRITTA2017_
