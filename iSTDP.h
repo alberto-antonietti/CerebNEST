@@ -140,7 +140,6 @@ public:
    */
   void send( nest::Event& e,
     nest::thread t,
-    double t_lastspike,
     const nest::CommonSynapseProperties& cp );
 
 
@@ -161,14 +160,13 @@ public:
   check_connection( nest::Node& s,
     nest::Node& t,
     nest::rport receptor_type,
-    double t_lastspike,
     const CommonPropertiesType& )
   {
     ConnTestDummyNode dummy_target;
 
     ConnectionBase::check_connection_( dummy_target, s, t, receptor_type );
 
-    t.register_stdp_connection( t_lastspike - get_delay() );
+    t.register_stdp_connection( t_lastspike_ - get_delay(), get_delay() );
   }
 
   void
@@ -224,6 +222,7 @@ private:
   double Wmax_;
   double Kplus_;
   double Wmin_;
+  double t_lastspike_;
 };
 
 
@@ -231,22 +230,18 @@ private:
  * Send an event to the receiver of this connection.
  * \param e The event to send
  * \param t The thread on which this connection is stored.
- * \param t_lastspike Time point of last spike emitted
+ * \param t_lastspike_ Time point of last spike emitted
  * \param cp Common properties object, containing the stdp parameters.
  */
 template < typename targetidentifierT >
 inline void
 iSTDP< targetidentifierT >::send( nest::Event& e,
   nest::thread t,
-  double t_lastspike,
   const nest::CommonSynapseProperties& )
 {
   // synapse STDP depressing/facilitation dynamics
-  //   if(t_lastspike >0) {std::cout << "last spike " << t_lastspike <<
-  //   std::endl ;}
   double t_spike = e.get_stamp().get_ms();
-  // t_lastspike_ = 0 initially
-
+  
   // use accessor functions (inherited from Connection< >) to obtain delay and
   // target
   nest::Node* target = get_target( t );
@@ -257,7 +252,7 @@ iSTDP< targetidentifierT >::send( nest::Event& e,
   std::deque< nest::histentry >::iterator finish;
 
 
-  // For a new synapse, t_lastspike contains the point in time of the last
+  // For a new synapse, t_lastspike_ contains the point in time of the last
   // spike. So we initially read the
   // history(t_last_spike - dendritic_delay, ..., T_spike-dendritic_delay]
   // which increases the access counter for these entries.
@@ -266,47 +261,47 @@ iSTDP< targetidentifierT >::send( nest::Event& e,
   // incremented by Archiving_Node::register_stdp_connection(). See bug #218 for
   // details.
   target->get_history(
-    t_lastspike - dendritic_delay, t_spike - dendritic_delay, &start, &finish );
+    t_lastspike_ - dendritic_delay, t_spike - dendritic_delay, &start, &finish );
    
   // facilitation due to post-synaptic spikes since last pre-synaptic spike
   double dtp_;
   double dtn_;
   while ( start != finish )
   {
-    //std::cout << start->t_ << "\t"<< t_lastspike << "\t" << t_spike  << std::endl;
-    
-   dtp_ = t_spike - (start ->t_);
-    
-    Kplus_ = calculate_k_(dtp_);
-   // std::cout << Kplus_ << std::endl;
-    weight_ = facilitate_( weight_, Kplus_);
+    //std::cout << start->t_ << "\t"<< t_lastspike_ << "\t" << t_spike  << std::endl;
+    dtp_ = t_spike - ( start -> t_ );
+    Kplus_ = calculate_k_( dtp_ );
+    // std::cout << Kplus_ << std::endl;
+    weight_ = facilitate_( weight_, Kplus_ );
 
-    if(t_lastspike > 0) { // se tolto va un po' tutto in vacca
-
-      dtn_ = (start ->t_) - t_lastspike ; 
-      Kplus_ = calculate_k_(dtn_);
-     // std::cout << start ->t_<< std::endl;
-      weight_ = facilitate_( weight_, Kplus_);
-      }
-    start++; // lasciare in fonto qui se no va in vacca tutto il resto
+    if( t_lastspike_ > 0 )
+    {
+      dtn_ = ( start -> t_ ) - t_lastspike_; 
+      Kplus_ = calculate_k_( dtn_ );
+      // std::cout << start ->t_<< std::endl;
+      weight_ = facilitate_( weight_, Kplus_ );
+    }
+    start++;
   }
 
 
-   //std::cout <<  << std::endl;
-
   e.set_receiver( *target );
   if ( weight_ < Wmin_ )
+  {
     weight_ = Wmin_;
+  }
   if ( weight_ > Wmax_ )
+  {
     weight_ = Wmax_;
+  }
   e.set_weight( weight_ );
   // use accessor functions (inherited from Connection< >) to obtain delay in
   // steps and rport
-  e.set_delay( get_delay_steps() );
+  e.set_delay_steps( get_delay_steps() );
   e.set_rport( get_rport() );
   e();
 
-  
+  t_lastspike_ = t_spike;
 
 }
 
@@ -323,6 +318,7 @@ iSTDP< targetidentifierT >::iSTDP()
   , Wmax_( 100.0 )
   , Kplus_( 0.0 )
   , Wmin_(-100.0)
+  , t_lastspike_( 0.0 )
 {
 }
 
@@ -339,6 +335,7 @@ iSTDP< targetidentifierT >::iSTDP(
   , Wmax_( rhs.Wmax_ )
   , Wmin_( rhs.Wmin_ )
   , Kplus_( rhs.Kplus_ )
+  , t_lastspike_( rhs.t_lastspike_ )
 {
 }
 
