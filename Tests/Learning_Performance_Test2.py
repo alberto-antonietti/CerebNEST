@@ -11,7 +11,7 @@ nest.Install("albertomodule")
 # Cell numbers
 MF_number = 12
 PC_number = 40
-DCN_number = 2  
+DCN_number = 2
 
 ''' SIMULATION PROPERTIES '''
 CORES = int(sys.argv[1])
@@ -34,8 +34,6 @@ nest.SetKernelStatus({'local_num_threads' : CORES,
                       'total_num_virtual_procs' : CORES,
                       'resolution' : 1.0,
                       'overwrite_files' : True})
-if CORES > 1:
-    nest.SetNumRecProcesses(1)
 msd = 1000 # master seed
 msdrange1 = range(msd, msd+CORES )
 pyrngs = [np.random.RandomState(s) for s in msdrange1]
@@ -72,20 +70,20 @@ if RECORDING_WEIGHTS:
 		"targets":    DCN
 	       }
     WeightMFDCN = nest.Create('weight_recorder',params=recdict2)
-    
+
 if PLAST2:
     vt2=nest.Create("volume_transmitter_alberto",DCN_number)
     for n,vti in enumerate(vt2):
         nest.SetStatus([vti],{"vt_num" : n})
-    
+
 nest.Connect(InputGen,MF,"one_to_one",{"model": "static_synapse",
                                        "weight": 1.0,
-                                       "delay": 1.0 
+                                       "delay": 1.0
                                       })
-                                    
+
 nest.Connect(ErrorGen,PC,"one_to_one",{"model": "static_synapse",
                                        "weight": 1.0,
-                                       "delay": 1.0 
+                                       "delay": 1.0
                                       })
 
 PCDCN_conn_param = {"model": "static_synapse",
@@ -98,7 +96,7 @@ nest.Connect(PC,DCN,{"rule" : "fixed_indegree", "indegree" : 40, "multapses" : F
 if RECORDING_WEIGHTS:
     nest.SetDefaults('stdp_synapse_cosexp',{"A_minus":   LTD2,   # double - Amplitude of weight change for depression
     					    "A_plus":    LTP2,   # double - Amplitude of weight change for facilitation 
-       					    "Wmin":      0.0,    # double - Minimal synaptic weight 
+       					    "Wmin":      0.0,    # double - Minimal synaptic weight
 					    "Wmax":      1.0,    # double - Maximal synaptic weight
                                             "vt":        vt2[0],
               				    "weight_recorder": WeightMFDCN[0]
@@ -107,7 +105,7 @@ if RECORDING_WEIGHTS:
 else:
     nest.SetDefaults('stdp_synapse_cosexp',{"A_minus":   LTD2,   # double - Amplitude of weight change for depression
                                             "A_plus":    LTP2,   # double - Amplitude of weight change for facilitation 
-                                            "Wmin":	 0.0,    # double - Minimal synaptic weight 
+                                            "Wmin":	 0.0,    # double - Minimal synaptic weight
                                             "Wmax":      1.0,    # double - Maximal synaptic weight
                                             "vt":        vt2[0]
                                            })
@@ -136,7 +134,7 @@ MFDCN_conn = nest.GetConnections(MF,DCN)
 print("Number of MF-DCN synapses: " + str(len(MFDCN_conn)))
 
 
-if RECORDING_CELLS:    
+if RECORDING_CELLS:
     # Create Auxiliary tools
     recdict = [{"to_memory": True, "to_file":True, "withgid":True, "withtime":  True, "label":"Spike_Detector_MF"},
                {"to_memory": True, "to_file":True, "withgid":True, "withtime":  True, "label":"Spike_Detector_PC"},
@@ -145,7 +143,7 @@ if RECORDING_CELLS:
     nest.Connect(MF, [spikedetector[0]])
     nest.Connect(PC, [spikedetector[1]])
     nest.Connect(DCN, [spikedetector[2]])
-    
+
 # Load input activity on MFs and PCs
 MFinput_file = open("MF_12.dat",'r')
 for InputGeni in InputGen:
@@ -155,7 +153,7 @@ for InputGeni in InputGen:
     for elements in Spikes_s:
         Spikes_f.append(float(elements))
     nest.SetStatus([InputGeni],{'spike_times' : Spikes_f})
-    
+
 PCinput_file = open("PC_40.dat",'r')
 for InputGeni in ErrorGen:
     Spikes_s = PCinput_file.readline()
@@ -175,9 +173,9 @@ msdrange2=range(msd+n_vp+1, msd+1+2*n_vp)
 nest.SetKernelStatus({'grng_seed' : msd+n_vp,
                       'rng_seeds' : msdrange2})
 
-print("### SIMULATION STARTS ###") 
+print("### SIMULATION STARTS ###")
 aux.tic()
 nest.Simulate(1001)
 aux.toc()
 
-sys.exit(0) #Everything went fine 
+sys.exit(0) #Everything went fine

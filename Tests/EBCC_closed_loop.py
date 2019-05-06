@@ -39,8 +39,6 @@ nest.SetKernelStatus({'local_num_threads' : CORES,
                       'total_num_virtual_procs' : CORES,
                       'resolution' : 1.0,
                       'overwrite_files' : True})
-if CORES>1:
-    nest.SetNumRecProcesses(1)
 msd = 1000 # master seed
 msdrange1 = range(msd, msd+CORES )
 pyrngs = [np.random.RandomState(s) for s in msdrange1]
@@ -182,11 +180,11 @@ if PLAST2:
     # MF-DCN excitatory plastic connections - every MF is connected with every DCN
     nest.SetDefaults('stdp_synapse_cosexp',{"A_minus":   LTD2,   # double - Amplitude of weight change for depression
                                             "A_plus":    LTP2,   # double - Amplitude of weight change for facilitation 
-                                            "Wmin":      0.0,    # double - Minimal synaptic weight 
+                                            "Wmin":      0.0,    # double - Minimal synaptic weight
                                             "Wmax":      0.25,     # double - Maximal synaptic weight
                                             "vt":        vt2[0]
                                             })
-    
+
     MFDCN_conn_param = {"model": 'stdp_synapse_cosexp',
                         "weight": Init_MFDCN,
                         "delay": 10.0}
@@ -199,7 +197,7 @@ else:
                         "weight": Init_MFDCN,
                         "delay":  10.0}
     nest.Connect(MF,DCN,'all_to_all',MFDCN_conn_param)
-    
+
 MFDCN_conn = nest.GetConnections(MF,DCN)
 
 # PC-DCN inhibitory plastic connections - each DCN receives 2 connections from 2 contiguous PC
@@ -244,7 +242,7 @@ nest.Connect(CLOSED_LOOP_N,IO[IO_number/2:],'one_to_one',{'weight' : 100.0})
 
 nest.PrintNetwork(2)
 
-if RECORDING_CELLS:    
+if RECORDING_CELLS:
     # Create Auxiliary tools
     recdict = [{"to_memory": True, "to_file":True, "withgid":True, "withtime":  True, "label":"Spike_Detector_MF" + str(CORES)},
                {"to_memory": True, "to_file":True, "withgid":True, "withtime":  True, "label":"Spike_Detector_GR" + str(CORES)},
@@ -257,7 +255,7 @@ if RECORDING_CELLS:
     nest.Connect(PC,  [spikedetector[2]])
     nest.Connect(IO,  [spikedetector[3]])
     nest.Connect(DCN, [spikedetector[4]])
-    
+
 
 Input_generation = nest.Create("spike_generator", MF_number)
 nest.Connect(Input_generation,MF,'one_to_one',{'weight': 100.0})
@@ -281,7 +279,7 @@ msdrange2=range(msd+n_vp+1, msd+1+2*n_vp)
 nest.SetKernelStatus({'grng_seed' : msd+n_vp,
                       'rng_seeds' : msdrange2})
 
-print "### SIMULATION STARTS ###" 
+print "### SIMULATION STARTS ###"
 nest.Simulate(TrialDuration*NumTrial)
 
 aux.toc()
