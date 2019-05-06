@@ -39,7 +39,6 @@
 #include <vector>
 
 
-
 // Includes from nestkernel:
 #include "common_synapse_properties.h"
 #include "connection.h"
@@ -76,8 +75,6 @@ public:
 
   Sgritta2017();
 
-  
-
   /**
    * Copy constructor.
    * Needs to be defined properly in order for GenericConnector to work.
@@ -102,8 +99,8 @@ public:
    * Set properties of this connection from the values given in dictionary.
    */
   void set_status( const DictionaryDatum& d, nest::ConnectorModel& cm );
- 
-  
+
+
   /**
    * Send an event to the receiver of this connection.
    * \param e The event to send
@@ -113,8 +110,6 @@ public:
   void send( nest::Event& e,
     nest::thread t,
     const nest::CommonSynapseProperties& cp );
-
-  
 
   class ConnTestDummyNode : public nest::ConnTestDummyNodeBase
   {
@@ -171,39 +166,34 @@ private:
 
     return multiplier;
   }
-     
+
   double
   FindPeaks( double perc )
   {
-    std::vector<double> DummyFreq;
     std::vector<double> DummyAmp;
     std::vector<double>::iterator found;
     std::vector<double>::iterator max;
-    int count = 0;
-   // int flag = 1;
-    double thr;
     double m;
     int index_m;
-    double f;
-    for (int i = 0; i<W_int;i++)
+    for ( int i = 0; i < W_int; i++ )
     {
-      if (Frequencies[ i ] <100)
+      if ( Frequencies[ i ] < 100 )
       {
-        DummyAmp.push_back(Amplitudes[ i ]);
+        DummyAmp.push_back( Amplitudes[ i ] );
         //std::cout << i << std::endl;
       }
     }
 
-    max = std::max_element(DummyAmp.begin(),DummyAmp.end());
+    max = std::max_element( DummyAmp.begin(), DummyAmp.end() );
     
     m = *max;
 
-    found = std::find(DummyAmp.begin(), DummyAmp.end(), m);
-    index_m = distance(DummyAmp.begin(), found);
+    found = std::find( DummyAmp.begin(), DummyAmp.end(), m );
+    index_m = distance( DummyAmp.begin(), found );
 
     return Frequencies[ index_m ];
   }
- 
+
   void
   four1( void )
   {
@@ -229,15 +219,15 @@ private:
       }
       j += m;
     }
- 
+
     // here begins the Danielson-Lanczos section
     mmax=2;
     while( n/2 > mmax )
     {
       istep = mmax << 1;
-      theta = -(2*M_PI/mmax);
-      wtemp = sin(0.5*theta);
-      wpr = -2.0*wtemp*wtemp;
+      theta = -( 2 * M_PI / mmax );
+      wtemp = sin( 0.5 * theta );
+      wpr = -2.0 * wtemp * wtemp;
       wpi = sin( theta );
       wr = 1.0;
       wi = 0.0;
@@ -245,21 +235,21 @@ private:
       {
         for ( i = m; i <= n; i += istep)
         {
-            j = i+mmax;
-            tempr = wr*Doppio[ j-1 ] - wi*Doppio[ j ];
-            tempi = wr * Doppio[ j ] + wi*Doppio[ j-1 ];
+          j = i + mmax;
+          tempr = wr * Doppio[ j-1 ] - wi * Doppio[ j ];
+          tempi = wr * Doppio[ j ] + wi * Doppio[ j-1 ];
 
-            Doppio[ j-1 ] = Doppio[ i-1 ] - tempr;
-            Doppio[ j ] = Doppio[ i ] - tempi;
-            Doppio[ i-1 ] += tempr;
-            Doppio[ i ] += tempi;
+          Doppio[ j-1 ] = Doppio[ i-1 ] - tempr;
+          Doppio[ j ] = Doppio[ i ] - tempi;
+          Doppio[ i-1 ] += tempr;
+          Doppio[ i ] += tempi;
         }
         wtemp = wr;
-        wr += wr*wpr - wi*wpi;
-        wi += wi*wpr + wtemp*wpi;
+        wr += wr * wpr - wi * wpi;
+        wi += wi * wpr + wtemp * wpi;
       }
       mmax = istep;
-    }  
+    }
   //std::cout << wpi << " " << wpr  << " " << theta << " " << wtemp << " "  << tempr << " " << tempi  << " " << wr << " " << wi << " "<< istep<<std::endl;
   }
 
@@ -344,7 +334,6 @@ private:
 
   }
 
-   
   void
   Inizializza(void)
   {
@@ -353,11 +342,11 @@ private:
     stepFreq = ( 1000.0 / resolution ) / W_int;
 
     for ( int i = 0; i < W_int; i++ )
-    {  
+    {
       Window.push_back( 0.0 );
       Amplitudes.push_back( 0.0 );
       Frequencies.push_back( b );
-      b = b + stepFreq; 
+      b = b + stepFreq;
     }
     //for (int i = 0; i < W_int; i++)
     //{
@@ -365,7 +354,6 @@ private:
     //}
   }
 
-    
   void
   Duplica( int flag )
   {
@@ -411,14 +399,13 @@ private:
     double k = 2.0 * std::pow( sin( 2 * M_PI * dt * 0.01 ), 5 ) *
       std::exp( -1 * std::abs( 0.0587701241739 *dt ) );
     //std::cout << k << std::endl;
-    return k; 
+    return k;
   }
 
   double
   facilitate_( double w, double kplus, double scaleFactor, double Peak )
   {
     double norm_w = 0.0;
-    double a = 0.0;
     if ( Peak >= 1.0 && Peak <= 2.75 ) // Only LTD if Peak between 1 and 2.75 Hz
     {
       if ( w < 0 )
@@ -472,13 +459,11 @@ private:
   int W;
   int W_int;
   double resolution = nest::Time::get_resolution().get_ms();
-  std::vector<double> Window; 
+  std::vector<double> Window;
   std::vector<double> Frequencies;
   std::vector<double> Doppio;
   std::vector<double> Amplitudes;
   double t_lastspike_;
-
-
 };
 
 
@@ -529,7 +514,7 @@ Sgritta2017< targetidentifierT >::send( nest::Event& e,
     //std::cout << t_spike << " pre"<< std::endl;
     if ( pos_old + deltaT  > W_int - 1 && flag != 0 && deltaT < W_int )
     {
-      // std::cout << t_spike << " IF1"<< std::endl; 
+      // std::cout << t_spike << " IF1"<< std::endl;
       // std::cout << " MOVE PRE " << " " << deltaT << " " << pos_old << " " << flagMove << " " << std::endl;
       MoveWindow(deltaT, pos_old, flagMove);
       //std::cout << " MOVE POST "<< t << std::endl;
@@ -542,7 +527,7 @@ Sgritta2017< targetidentifierT >::send( nest::Event& e,
           std::cout << " CHECK1 FAIL " << std::endl;
         }
         InstantFreq( t_spike, t_old, pos, Window[ pos ] );
-        Duplica( flagMove ); 
+        Duplica( flagMove );
         //std::cout << "target " << target->get_gid() << " " <<posF << " IF1"<< std::endl;
         four1();
         CalculateA();
@@ -558,7 +543,7 @@ Sgritta2017< targetidentifierT >::send( nest::Event& e,
         //std::cout << "PRE" << std::endl;
         if ( t == 0 )
         {
-          amp_ << FindPeaks( mu_minus_ ) << "\t" ;
+          amp_ << FindPeaks( mu_minus_ ) << "\t";
           //std::cout << FindPeaks(mu_minus_) << std::endl;
         }
         if ( flagMove == 0 )
@@ -580,7 +565,7 @@ Sgritta2017< targetidentifierT >::send( nest::Event& e,
           Kplus_ = calculate_k_( dtp_ );
           alpha = CalculateMultiplier( peak );
           weight_ = facilitate_( weight_, Kplus_, alpha, peak );
-          dtn_ = ( start ->t_) - t_lastspike_ ; 
+          dtn_ = ( start ->t_) - t_lastspike_;
           Kplus_ = calculate_k_( dtn_ );
           alpha = CalculateMultiplier( peak );
           weight_ = facilitate_( weight_, Kplus_, alpha, peak );
@@ -603,7 +588,7 @@ Sgritta2017< targetidentifierT >::send( nest::Event& e,
     else if (flag == 0)
     {
       //OutputFile_.open( "OutputFile.dat" );
-      // freq_.open( "freq.dat" );
+      //freq_.open( "freq.dat" );
       if (t == 0)
       {
         amp_.close();
@@ -616,7 +601,7 @@ Sgritta2017< targetidentifierT >::send( nest::Event& e,
       {
         std::cout << " CHECK4 FAIL " << std::endl;
       }
-      Window[ posF ] = 4.0; 
+      Window[ posF ] = 4.0;
       flag = 1;
     }
     t_old = t_spike;
@@ -626,8 +611,8 @@ Sgritta2017< targetidentifierT >::send( nest::Event& e,
     {
       amp_.flush();
     }
- 
-    start++; // lasciare in fonto qui se no va in vacca tutto il resto;
+
+    ++start;
     //std::cout << posF << std::endl;
   }
 

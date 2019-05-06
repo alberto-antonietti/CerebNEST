@@ -41,7 +41,7 @@
    Examples:
 
    Parameters:
-           vt		 long   - ID of volume_transmitter collecting the spikes from the pool of
+           vt        long   - ID of volume_transmitter collecting the spikes from the pool of
                               dopamine releasing neurons and transmitting the spikes
                               to the synapse. A value of -1 indicates that no volume
                               transmitter has been assigned.
@@ -214,7 +214,7 @@ private:
 
   // time of last update, which is either time of last presyn. spike or time-driven update
   double t_last_update_;
-    
+
   double t_lastspike_;
 };
 
@@ -251,9 +251,13 @@ template < typename targetidentifierT > void STDPCosExpConnection< targetidentif
   def< double >( d, nest::names::weight, weight_ );
   def< long >( d, "vt_num", vt_num_ );
   if ( vt_ != 0 )
+  {
     def< long >( d, "modulator", vt_->get_gid() );
+  }
   else
+  {
     def< long >( d, "modulator", -1 );
+  }
 
 }
 
@@ -397,11 +401,11 @@ STDPCosExpConnection< targetidentifierT >::send( nest::Event& e,
       pow( cos( sd / 1000.0 ),2 );
   }
   update_weight_( LTD_amount, cp );
-  
+
   while ( SpikeBuffer_[ 0 ] < t_spike - 10.0 )
   {
     SpikeBuffer_.erase( SpikeBuffer_.begin() );
-  }  
+  }
   e.set_receiver( *target );
   e.set_weight( weight_ );
   e.set_delay_steps( get_delay_steps() );
@@ -433,7 +437,7 @@ STDPCosExpConnection< targetidentifierT >::trigger_update_weight(
   // get spike history in relevant range (t_last_update, t_trig] from postsyn. neuron
   std::deque< nest::histentry >::iterator start;
   std::deque< nest::histentry >::iterator finish;
-  get_target( t )->get_history(t_last_update_ - dendritic_delay, t_trig - dendritic_delay, &start, &finish );
+  get_target( t )->get_history( t_last_update_ - dendritic_delay, t_trig - dendritic_delay, &start, &finish );
 
   // facilitation due to postsyn. spikes since last update
   double t0 = t_last_update_;
@@ -461,8 +465,6 @@ STDPCosExpConnection< targetidentifierT >::get_node()
     return vt_;
   }
 }
-
-
 
 } // of namespace mynest
 

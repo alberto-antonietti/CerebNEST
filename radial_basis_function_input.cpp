@@ -126,7 +126,7 @@ mynest::radial_basis_function_input::calibrate()
                 << std::endl;
       return;
     }
-    while ( !DesFile.eof() )
+    while ( not( DesFile.eof() ) )
     {
       DesFile >> Val;
       V_.DesValues_.push_back( Val );
@@ -142,30 +142,29 @@ mynest::radial_basis_function_input::update( nest::Time const& origin, const lon
   assert(
     to >= 0 && ( nest::delay ) from < nest::kernel().connection_manager.get_min_delay() );
   assert( from < to );
- 
+
   for ( long lag = from; lag < to; ++lag )
   {
-	  int t = origin.get_steps() + lag;
-	  double Desired = V_.DesValues_[ t ];
-	  double Value = 0.0;	// ranges from 0 (0 Hz) to 1 (Max Frequency)
-	  double MaxFraction = nest::Time::get_resolution().get_ms() * P_.Rate_ / 1000.0;	// Since it is updated each X ms
-	  double MaxFractionNoise = nest::Time::get_resolution().get_ms() * P_.Noise_ / 1000.0;	// Since it is updated each X ms
-	  
-	  Value = exp(-pow(((Desired-P_.Mean_)/P_.SDev_), 2 ));
-	  
-	  if ( MaxFraction * Value > rng_->drand() || MaxFractionNoise > rng_->drand() )
+    int t = origin.get_steps() + lag;
+    double Desired = V_.DesValues_[ t ];
+    double Value = 0.0; // ranges from 0 (0 Hz) to 1 (Max Frequency)
+    double MaxFraction = nest::Time::get_resolution().get_ms() * P_.Rate_ / 1000.0; // Since it is updated each X ms
+    double MaxFractionNoise = nest::Time::get_resolution().get_ms() * P_.Noise_ / 1000.0; // Since it is updated each X ms
+
+    Value = exp(-pow(((Desired-P_.Mean_)/P_.SDev_), 2 ));
+
+    if ( MaxFraction * Value > rng_->drand() || MaxFractionNoise > rng_->drand() )
       {
         nest::SpikeEvent se;
         se.set_multiplicity( 1 );
         nest::kernel().event_delivery_manager.send( *this, se, lag );
         set_spiketime( nest::Time::step( t + 1 ) );
       }
-	  
   }
 }
 
 void
 mynest::radial_basis_function_input::handle( nest::SpikeEvent& e )
 {
-  
+
 }

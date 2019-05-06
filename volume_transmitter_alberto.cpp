@@ -56,13 +56,13 @@ mynest::volume_transmitter_alberto::Parameters_::Parameters_()
 void
 mynest::volume_transmitter_alberto::Parameters_::get( DictionaryDatum& d ) const
 {
-  def< long >( d, "deliver_interval", deliver_interval_ );
+  def< long >( d, nest::names::deliver_interval, deliver_interval_ );
   def< long >( d, "vt_num", vt_num_ );
 }
 
 void mynest::volume_transmitter_alberto::Parameters_::set( const DictionaryDatum& d )
 {
-  updateValue< long >( d, "deliver_interval", deliver_interval_ );
+  updateValue< long >( d, nest::names::deliver_interval, deliver_interval_ );
   updateValue< long >( d, "vt_num", vt_num_ );
 }
 
@@ -106,33 +106,35 @@ mynest::volume_transmitter_alberto::calibrate()
 }
 
 void
-mynest::volume_transmitter_alberto::update( nest::Time const& slice_origin, const long from, const long to )
+mynest::volume_transmitter_alberto::update( const nest::Time&, const long from, const long to )
 {
   // spikes that arrive in this time slice are stored in spikecounter_
   double t_spike;
   double multiplicity;
   long lag = from;
   multiplicity = B_.neuromodulatory_spikes_.get_value( lag );
-  if ( multiplicity > 0 ){
-     t_spike =  nest::Time( nest::Time::step( nest::kernel().simulation_manager.get_slice_origin().get_steps()+ lag + 1 ) ).get_ms();
-     B_.spikecounter_.push_back( nest::spikecounter( t_spike, P_.vt_num_ ) );
+  if ( multiplicity > 0 )
+  {
+    t_spike =  nest::Time( nest::Time::step( nest::kernel().simulation_manager.get_slice_origin().get_steps()+ lag + 1 ) ).get_ms();
+    B_.spikecounter_.push_back( nest::spikecounter( t_spike, P_.vt_num_ ) );
 
-     // all spikes stored in spikecounter_ are delivered to the target synapses
-     if ( ( nest::kernel().simulation_manager.get_slice_origin().get_steps() + to ) % ( P_.deliver_interval_ * nest::kernel().connection_manager.get_min_delay() ) == 0 ){
-         double t_trig = nest::Time(nest::Time::step( nest::kernel().simulation_manager.get_slice_origin().get_steps() + to ) ).get_ms();
-         if ( !B_.spikecounter_.empty() ){
-            //std::cout << P_.vt_num_ << " << P_.vt_num_ " << get_gid() << " << get_gid() " << std::endl; 
-            nest::kernel().connection_manager.trigger_update_weight(get_gid()-P_.vt_num_, B_.spikecounter_, t_trig );
-		}
-         // clear spikecounter
-         B_.spikecounter_.clear();
+    // all spikes stored in spikecounter_ are delivered to the target synapses
+    if ( ( nest::kernel().simulation_manager.get_slice_origin().get_steps() + to ) % ( P_.deliver_interval_ * nest::kernel().connection_manager.get_min_delay() ) == 0 )
+    {
+      double t_trig = nest::Time(nest::Time::step( nest::kernel().simulation_manager.get_slice_origin().get_steps() + to ) ).get_ms();
+      if ( not( B_.spikecounter_.empty() ) )
+      {
+        //std::cout << P_.vt_num_ << " << P_.vt_num_ " << get_gid() << " << get_gid() " << std::endl;
+        nest::kernel().connection_manager.trigger_update_weight(get_gid()-P_.vt_num_, B_.spikecounter_, t_trig );
+      }
+      // clear spikecounter
+      B_.spikecounter_.clear();
 
-         // as with trigger_update_weight dopamine trace has been updated to t_trig,
-         // insert pseudo last dopa spike at t_trig
-         B_.spikecounter_.push_back( nest::spikecounter( t_trig, 0.0 ) );
+      // as with trigger_update_weight dopamine trace has been updated to t_trig,
+      // insert pseudo last dopa spike at t_trig
+      B_.spikecounter_.push_back( nest::spikecounter( t_trig, 0.0 ) );
     }
   }
-
 }
 
 void

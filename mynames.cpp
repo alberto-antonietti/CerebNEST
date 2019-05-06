@@ -25,7 +25,6 @@ namespace mynest
 {
 namespace mynames
 {
-	
 const Name first_dcn( "first_dcn" );
 const Name gain( "gain" );
 const Name num_dcn( "num_dcn" );

@@ -41,7 +41,7 @@
    Examples:
 
    Parameters:
-           vt		 long   - ID of volume_transmitter collecting the spikes from the pool of
+           vt        long   - ID of volume_transmitter collecting the spikes from the pool of
                               dopamine releasing neurons and transmitting the spikes
                               to the synapse. A value of -1 indicates that no volume
                               transmitter has been assigned.
@@ -212,7 +212,7 @@ private:
 
   // time of last update, which is either time of last presyn. spike or time-driven update
   double t_last_update_;
-    
+
   double t_lastspike_;
 };
 
@@ -249,9 +249,13 @@ template < typename targetidentifierT > void STDPSinExpConnection< targetidentif
   def< double >( d, nest::names::weight, weight_ );
   def< long >( d, "vt_num", vt_num_ );
   if ( vt_ != 0 )
+  {
     def< long >( d, "modulator", vt_->get_gid() );
+  }
   else
+  {
     def< long >( d, "modulator", -1 );
+  }
 
 }
 
@@ -435,8 +439,6 @@ STDPSinExpConnection< targetidentifierT >::get_node()
     return vt_;
   }
 }
-
-
 
 } // of namespace mynest
 
