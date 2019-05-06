@@ -10,4 +10,3 @@ def toc():
         print ("Elapsed time is %.3f seconds" % tempo)
     else:
         print "Toc: start time not set"
-		

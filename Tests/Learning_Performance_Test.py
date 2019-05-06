@@ -10,8 +10,8 @@ nest.Install("albertomodule")
 
 # Cell numbers
 GR_number = 65600
-PC_number = 2 
-IO_number = 2  
+PC_number = 2
+IO_number = 2
 
 ''' SIMULATION PROPERTIES '''
 CORES = int(sys.argv[1])
@@ -33,8 +33,6 @@ nest.SetKernelStatus({'local_num_threads' : CORES,
                       'total_num_virtual_procs' : CORES,
                       'resolution' : 1.0,
                       'overwrite_files' : True})
-if CORES > 1:
-    nest.SetNumRecProcesses(1)
 msd = 1000 # master seed
 msdrange1 = range(msd, msd+CORES )
 pyrngs = [np.random.RandomState(s) for s in msdrange1]
@@ -71,18 +69,18 @@ if RECORDING_WEIGHTS:
 				"precision":  8
 			   }
     WeightPFPC = nest.Create('weight_recorder',params=recdict2)
-    
+
 if PLAST1:
     vt=nest.Create("volume_transmitter_alberto",PC_number)
     for n,vti in enumerate(vt):
         nest.SetStatus([vti],{"vt_num" : n})
-    
+
 # Connection 0
 nest.Connect(InputGen,GR,"one_to_one",{"model": "static_synapse",
                                        "weight": 1.0,
-                                       "delay": 1.0 
+                                       "delay": 1.0
                                        })
-                                    
+
 nest.Connect(ErrorGen,IO,"one_to_one",{"model": "static_synapse",
                                        "weight": 1.0,
                                        "delay": 1.0 
@@ -104,7 +102,7 @@ if PLAST1:
 												"Wmin":      0.0,    # double - Minimal synaptic weight 
 												"Wmax":      4.0,
                                                                                                 "vt":        vt[0]
-                                                                                                })	
+                                                                                                })
     PFPC_conn_param = {"model":  'stdp_synapse_sinexp',
                        "weight": Init_PFPC,
                        "delay":  1.0,
@@ -132,7 +130,7 @@ if PLAST1:
     IOPC_conn = nest.GetConnections(IO,vt)
     print("Number of IO-PC (volume_transmitter) synapses: " + str(len(IOPC_conn)))
 
-if RECORDING_CELLS:    
+if RECORDING_CELLS:
     # Create Auxiliary tools
     recdict = [{"to_memory": True, "to_file":True, "withgid":True, "withtime":  True, "label":"Spike_Detector_GR"},
                {"to_memory": True, "to_file":True, "withgid":True, "withtime":  True, "label":"Spike_Detector_PC"},
@@ -141,7 +139,7 @@ if RECORDING_CELLS:
     nest.Connect(GR, [spikedetector[0]])
     nest.Connect(PC, [spikedetector[1]])
     nest.Connect(IO, [spikedetector[2]])
-    
+
 # Load input activity on GRs
 GRinput_file = open("GR_65600.dat",'r')
 for InputGeni in InputGen:
@@ -151,7 +149,7 @@ for InputGeni in InputGen:
     for elements in Spikes_s:
         Spikes_f.append(float(elements))
     nest.SetStatus([InputGeni],{'spike_times' : Spikes_f})
-    
+
 nest.SetStatus([ErrorGen[0]],{'spike_times' : [8.0, 98.0, 298.0, 308.0, 318.0, 498.0, 598.0, 698.0, 798.0, 997.0]})
 nest.SetStatus([ErrorGen[1]],{'spike_times' : [18.0, 198.0, 258.0, 358.0, 368.0, 458.0, 558.0, 658.0, 758.0, 957.0]})
 
@@ -165,9 +163,9 @@ msdrange2=range(msd+n_vp+1, msd+1+2*n_vp)
 nest.SetKernelStatus({'grng_seed' : msd+n_vp,
                       'rng_seeds' : msdrange2})
 
-print("### SIMULATION STARTS ###") 
+print("### SIMULATION STARTS ###")
 aux.tic()
 nest.Simulate(1001)
 aux.toc()
 
-sys.exit(0) #Everything went fine 
+sys.exit(0) #Everything went fine

@@ -11,11 +11,11 @@ else:
 
 print("Looking into: " , PathDir)
 
-for root,dirs,files in os.walk(PathDir):  
-    for name in files:  
+for root,dirs,files in os.walk(PathDir):
+    for name in files:
 
-        filename=os.path.join(root,name)  
+        filename=os.path.join(root,name)
 
-        if os.stat(filename).st_size==0:  
+        if os.stat(filename).st_size==0:
             print("Removing ", filename)
             os.remove(filename)
