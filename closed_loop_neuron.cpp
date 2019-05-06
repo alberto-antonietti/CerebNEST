@@ -51,6 +51,12 @@
 mynest::closed_loop_neuron::Parameters_::Parameters_()
   : Gain_( 1.0 )      // adimensional
   , NumDCN_( 1.0 )    // Number of DCN as output
+  , FirstDCN_( 1.0 )
+  , Protocol_( 0.0 )
+  , USOnset_( 0.0 )
+  , USDuration_( 0.0 )
+  , TrialDuration_( 0.0 )
+  , Phase_( 0.0 )
   , Positive_( true ) // Positive or Negative Neuron
   , ToFile_( false )  // If it writes the OutputFile.dat
 {
@@ -100,6 +106,8 @@ mynest::closed_loop_neuron::Parameters_::set( const DictionaryDatum& d )
 mynest::closed_loop_neuron::closed_loop_neuron()
   : Archiving_Node()
   , P_()
+  , V_()
+  , B_()
 {
 }
 
@@ -137,8 +145,9 @@ mynest::closed_loop_neuron::calibrate()
   V_.OutputVariables_[ 0 ] = 0.0; // POSITIVE VARIABLE
   V_.OutputVariables_[ 1 ] = 0.0; // NEGATIVE VARIABLE
   for ( int i = 0; i < 50; i++ )
+  {
     V_.DCNBuffer_.push_back( 0.0 );
-
+  }
   if ( P_.Protocol_ == 2.0 )
   {
     std::ifstream DesFile;
@@ -161,7 +170,9 @@ mynest::closed_loop_neuron::calibrate()
   {
     V_.OutputFile_.open( "OutputFile.dat" );
     if ( P_.Protocol_ == 1.0 )
+    {
       V_.CRFile_.open( "CR.dat" );
+    }
   }
   V_.Trial_ = 0;
   rng_ = nest::kernel().rng_manager.get_rng( get_thread() );
@@ -211,7 +222,9 @@ mynest::closed_loop_neuron::update( nest::Time const& origin, const long from, c
     {
       V_.Trial_++;
       if ( P_.ToFile_ )
+      {
         std::cout << "Trial : " << V_.Trial_ << std::endl;
+      }
       V_.CRFlag_ = false;
     }
 
@@ -223,10 +236,14 @@ mynest::closed_loop_neuron::update( nest::Time const& origin, const long from, c
             + P_.USDuration_
         && P_.Positive_ )
       {
-        if ( !V_.CRFlag_ )
+        if ( not( V_.CRFlag_ ) )
+        {
           Error = 1.0; // NO CR before
+        }
         else
+        {
           Error = 0.5; // CR before
+        }
       }
     }
     else if ( P_.Protocol_ == 1.0 && V_.Trial_ > P_.Phase_ )
@@ -242,7 +259,7 @@ mynest::closed_loop_neuron::update( nest::Time const& origin, const long from, c
         && ( t - ( V_.Trial_ - 1 ) * P_.TrialDuration_ )
           > ( P_.USOnset_ - 200.0 )
         && V_.DCNAvg_ > P_.Gain_
-        && !V_.CRFlag_ )
+        && not( V_.CRFlag_ ) )
       {
         V_.CRFlag_ = true;
         if ( P_.ToFile_ )
@@ -251,7 +268,9 @@ mynest::closed_loop_neuron::update( nest::Time const& origin, const long from, c
         }
       }
       if ( P_.ToFile_ )
+      {
         V_.OutputFile_ << V_.DCNAvg_ << std::endl;
+      }
     }
 
     //!< VOR PROTOCOL - ACQUISITION AND EXTINCTION
@@ -260,8 +279,10 @@ mynest::closed_loop_neuron::update( nest::Time const& origin, const long from, c
       double Desired = V_.DesValues_[ t ];
       Error = Desired - V_.DCNAvg_ * P_.Gain_;
       if ( P_.ToFile_ )
+      {
         V_.OutputFile_ << Desired << "\t" << V_.DCNAvg_* P_.Gain_ << "\t"
                        << Error << std::endl;
+      }
     }
 
 
@@ -292,7 +313,7 @@ mynest::closed_loop_neuron::update( nest::Time const& origin, const long from, c
         set_spiketime( nest::Time::step( t + 1 ) );
       }
     }
-    else if ( !P_.Positive_ && Error < 0.0 )
+    else if ( not( P_.Positive_ ) && Error < 0.0 )
     {
       if ( -0.01 * Error > rng_->drand() )
       {

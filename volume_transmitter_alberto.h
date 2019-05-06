@@ -34,8 +34,10 @@
 #include "namedatum.h"
 
 
-/* BeginDocumentation
+namespace mynest
+{
 
+/** @BeginDocumentation
 Name: volume_transmitter_alberto - Node used in combination with neuromodulated synaptic
 plasticity. It collects all spikes emitted by the population of neurons
 connected to the volume transmitter and transmits the signal to a user-specific
@@ -63,9 +65,9 @@ framework presented in [1].
 
 Examples:
 /volume_transmitter_alberto Create /vol Set
-/iaf_neuron Create /pre_neuron Set
-/iaf_neuron Create /post_neuron Set
-/iaf_neuron Create /neuromod_neuron Set
+/iaf_psc_alpha Create /pre_neuron Set
+/iaf_psc_alpha Create /post_neuron Set
+/iaf_psc_alpha Create /neuromod_neuron Set
 /stdp_dopamine_synapse  << /vt vol >>  SetDefaults
 neuromod_neuron vol Connect
 pre_neuron post_neuron /stdp_dopamine_synapse Connect
@@ -82,30 +84,16 @@ References:
     Front. Comput. Neurosci. 4:141. doi:10.3389/fncom.2010.00141
 
 Author: Wiebke Potjans, Abigail Morrison
+
 Remarks: major changes to update function after code revision in Apr 2013 (SK)
+
 Receives: SpikeEvent
 
 SeeAlso: stdp_dopamine_synapse
 
 */
-
-namespace mynest
-{
-
 class ConnectorBase;
 
-/**
- * volume transmitter class.
- *
- * This class manages spike recording for normal and precise spikes. It
- * receives spikes via its handle(SpikeEvent&) method and buffers them. In the
- * update() method it stores the newly collected buffer elements, which are
- * delivered in time steps of (d_min*deliver_interval) to the neuromodulated
- * synapses. In addition the synapses can ask the volume transmitter to deliver
- * the elements stored in the update() method with the method deliver_spikes().
- *
- * @ingroup Devices
- */
 class volume_transmitter_alberto : public nest::Archiving_Node
 {
 
@@ -139,19 +127,24 @@ public:
   void get_status( DictionaryDatum& d ) const;
   void set_status( const DictionaryDatum& d );
 
+  /**
+   * Since volume transmitters are duplicated on each thread, and are
+   * hence treated just as devices during node creation, we need to
+   * define the corresponding setter and getter for local_device_id.
+   **/
+  void set_local_device_id( const nest::index ldid );
+  nest::index get_local_device_id() const;
+
   const std::vector< nest::spikecounter >& deliver_spikes();
 
 private:
-  void init_state_( const nest::Node& proto );
+  void init_state_( nest::Node const& );
   void init_buffers_();
   void calibrate();
 
-  void update( nest::Time const&, const long, const long );
+  void update( const nest::Time&, const long, const long );
 
   // --------------------------------------------
-  // The next two classes need to be friends to access the State_ class/member
-  //friend class nest::RecordablesMap< volume_transmitter_alberto >;
-  //friend class nest::UniversalDataLogger< volume_transmitter_alberto >;
 
   /**
    * Independent parameters of the model.
@@ -177,15 +170,16 @@ private:
   Parameters_ P_;
   Buffers_ B_;
 
-  //! Mapping of recordables names to access functions
-  //static nest::RecordablesMap< volume_transmitter_alberto > recordablesMap_;
+  nest::index local_device_id_;
 };
 
 inline nest::port
 volume_transmitter_alberto::handles_test_event( nest::SpikeEvent&, nest::rport receptor_type )
 {
   if ( receptor_type != 0 )
+  {
     throw nest::UnknownReceptorType( receptor_type, get_name() );
+  }
   return 0;
 }
 
@@ -217,7 +211,19 @@ volume_transmitter_alberto::set_status( const DictionaryDatum& d )
 inline const std::vector< nest::spikecounter >&
 volume_transmitter_alberto::deliver_spikes()
 {
-    return B_.spikecounter_;
+  return B_.spikecounter_;
+}
+
+inline void
+volume_transmitter_alberto::set_local_device_id( const nest::index ldid )
+{
+  local_device_id_ = ldid;
+}
+
+inline nest::index
+volume_transmitter_alberto::get_local_device_id() const
+{
+  return local_device_id_;
 }
 
 } // namespace

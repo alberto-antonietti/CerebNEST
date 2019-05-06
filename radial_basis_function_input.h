@@ -91,10 +91,10 @@ private:
   //! Model parameters
   struct Parameters_
   {
-    double Rate_; 		//!<
-    double Noise_; 		//!<
-    double Mean_; 		//!< 
-    double SDev_;       //!< 
+    double Rate_;
+    double Noise_;
+    double Mean_;
+    double SDev_;
     std::string FileDesired_; //!< indicates the Path of the File with the
                               //!< Input Variable
 

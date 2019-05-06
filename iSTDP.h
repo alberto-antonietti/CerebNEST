@@ -177,40 +177,32 @@ public:
 
 private:
   double
-  calculate_k_(double dt)
+  calculate_k_( double dt )
   {
-    double k = Wmax_ * 0.03 *std::exp(  - 1.0 * ( std::abs(dt) / tau_plus_)) * (1 + cos(2*(dt)/tau_plus_)) -lambda_ * Wmax_ * 0.03 * mu_plus_ * std::exp(  - 1.0 *      (std::abs (dt) / mu_minus_)) * (1 - cos(2*(dt)/mu_minus_));
+    double k = Wmax_ * 0.03 *std::exp( - 1.0 * ( std::abs(dt) / tau_plus_)) * (1 + cos(2*(dt)/tau_plus_)) -lambda_ * Wmax_ * 0.03 * mu_plus_ * std::exp(  - 1.0 *      (std::abs (dt) / mu_minus_)) * (1 - cos(2*(dt)/mu_minus_));
    // std::cout << cos(2*(dt)/195.6) << std::endl;
     //std::cout << cos(2*(dt)/125) << std::endl;
-    return k; 
+    return k;
   }
   double
   facilitate_( double w, double kplus )
   {
     double norm_w;
     double norm_w1 = 0.5 * kplus;
-    if(w >= 0){
-    norm_w = norm_w1 + w;}
-    if(w < 0){
-    norm_w = norm_w1 + w;}
-    
-	//( w / Wmax_ )
-     // + ( lambda_ * std::pow( 1.0 - ( w / Wmax_ ), mu_plus_ ) * kplus );
-   //std::cout << norm_w1<< std::endl;
-   //std::cout << kplus << std::endl;
-	
+    if ( w >= 0 )
+    {
+      norm_w = norm_w1 + w;
+    }
+    if ( w < 0 )
+    {
+      norm_w = norm_w1 + w;
+    }
+
+    //std::cout << norm_w1<< std::endl;
+    //std::cout << kplus << std::endl;
+
     return norm_w;
   }
-
-  //double
-  //depress_( double w, double kplus )
-  //{
-    //double norm_w =  w + (0.03 * Wmax_ * kplus);
-	//( w / Wmax_ )
-     // - ( alpha_ * lambda_ * std::pow( w / Wmax_, mu_minus_ ) * kminus );
-	//std::cout << "FACILITATE" << std::endl; ;
- //   return norm_w;
-  //}
 
   // data members of each connection
   double weight_;
@@ -262,7 +254,7 @@ iSTDP< targetidentifierT >::send( nest::Event& e,
   // details.
   target->get_history(
     t_lastspike_ - dendritic_delay, t_spike - dendritic_delay, &start, &finish );
-   
+
   // facilitation due to post-synaptic spikes since last pre-synaptic spike
   double dtp_;
   double dtn_;
@@ -276,12 +268,12 @@ iSTDP< targetidentifierT >::send( nest::Event& e,
 
     if( t_lastspike_ > 0 )
     {
-      dtn_ = ( start -> t_ ) - t_lastspike_; 
+      dtn_ = ( start -> t_ ) - t_lastspike_;
       Kplus_ = calculate_k_( dtn_ );
       // std::cout << start ->t_<< std::endl;
       weight_ = facilitate_( weight_, Kplus_ );
     }
-    start++;
+    ++start;
   }
 
 

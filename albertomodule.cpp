@@ -117,7 +117,7 @@ mynest::AlbertoModule::init( SLIInterpreter* i )
   */
   nest::kernel().model_manager.register_node_model< mynest::volume_transmitter_alberto >(
     "volume_transmitter_alberto" );
-  
+
   nest::kernel().model_manager.register_node_model< mynest::closed_loop_neuron >(
     "closed_loop_neuron" );
 
@@ -134,12 +134,11 @@ mynest::AlbertoModule::init( SLIInterpreter* i )
      nest::TargetIdentifierIndex reduces the memory requirement of synapses
      even further, but limits the number of available rports. Please see
      Kunkel et al, Front Neurofinfom 8:78 (2014), Sec 3.3.2, for details.
-  
   */
   nest::kernel()
     .model_manager.register_connection_model< STDPSinExpConnection< nest::
         TargetIdentifierPtrRport > >( "stdp_synapse_sinexp" );
-  
+
   nest::kernel()
     .model_manager.register_connection_model< STDPCosExpConnection< nest::
         TargetIdentifierPtrRport > >( "stdp_synapse_cosexp" );

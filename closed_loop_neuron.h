@@ -189,7 +189,9 @@ closed_loop_neuron::handles_test_event( nest::SpikeEvent&, nest::rport receptor_
 {
   // Allow connections only to port 0
   if ( receptor_type == 0 )
+  {
     return receptor_type;
+  }
   else
     throw nest::UnknownReceptorType( receptor_type, get_name() );
 }
