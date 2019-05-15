@@ -62,12 +62,12 @@ InputGen = nest.Create("spike_generator", GR_number)
 ErrorGen = nest.Create("spike_generator", IO_number)
 if RECORDING_WEIGHTS:
     recdict2 = {"to_memory": False,
-				"to_file":    True,
-				"label":     "PFPC",
-				"senders":    GR,
-				"targets":    PC,
-				"precision":  8
-			   }
+                "to_file":    True,
+                "label":     "PFPC",
+                "senders":    GR,
+                "targets":    PC,
+                "precision":  8
+               }
     WeightPFPC = nest.Create('weight_recorder',params=recdict2)
 
 if PLAST1:
@@ -89,28 +89,30 @@ nest.Connect(ErrorGen,IO,"one_to_one",{"model": "static_synapse",
 # Connection 6
 if PLAST1:
     if RECORDING_WEIGHTS:
-		nest.SetDefaults('stdp_synapse_sinexp',{"A_minus":   LTD1,   # double - Amplitude of weight change for depression
-												"A_plus":    LTP1,   # double - Amplitude of weight change for facilitation 
-												"Wmin":      0.0,    # double - Minimal synaptic weight 
-												"Wmax":      4.0,    # double - Maximal synaptic weight
-												"weight_recorder": WeightPFPC[0],
+        nest.SetDefaults('stdp_synapse_sinexp',{"A_minus":   LTD1,   # double - Amplitude of weight change for depression
+                                                "A_plus":    LTP1,   # double - Amplitude of weight change for facilitation
+                                                "Wmin":      0.0,    # double - Minimal synaptic weight
+                                                "Wmax":      4.0,    # double - Maximal synaptic weight
+                                                "weight_recorder": WeightPFPC[0],
                                                 "vt": vt[0]
-												})
+                                                })
     else:
-		nest.SetDefaults('stdp_synapse_sinexp',{"A_minus":   LTD1,   # double - Amplitude of weight change for depression
-												"A_plus":    LTP1,   # double - Amplitude of weight change for facilitation 
-												"Wmin":      0.0,    # double - Minimal synaptic weight 
-												"Wmax":      4.0,
-                                                                                                "vt":        vt[0]
+        nest.SetDefaults('stdp_synapse_sinexp',{"A_minus":   LTD1,   # double - Amplitude of weight change for depression
+                                                "A_plus":    LTP1,   # double - Amplitude of weight change for facilitation
+                                                "Wmin":      0.0,    # double - Minimal synaptic weight
+                                                "Wmax":      4.0,
+                                                "vt":        vt[0]
                                                                                                 })
-    PFPC_conn_param = {"model":  'stdp_synapse_sinexp',
-                       "weight": Init_PFPC,
-                       "delay":  1.0,
-                       }
-    nest.Connect(GR,PC,{'rule': "fixed_indegree", 'indegree':65600, "multapses": False, "autapses": False},PFPC_conn_param)
+
     for n,PCi in enumerate(PC):
-        A=nest.GetConnections(GR,[PCi])
-        nest.SetStatus(A,{'vt_num': float(n)})
+        PFPC_conn_param = {"model": 'stdp_synapse_sinexp',
+                           "weight": Init_PFPC,
+                           "delay": 1.0,
+                           "vt_num": float(n)
+                           }
+        nest.Connect(GR, [PCi], {'rule': "fixed_indegree", 'indegree': 65600, "multapses": False, "autapses": False},
+                     PFPC_conn_param)
+
 
 else:
     PFPC_conn_param = {"model":  "static_synapse",
@@ -118,8 +120,6 @@ else:
                        "delay":  1.0,
                        }
     nest.Connect(GR,PC,{'rule': "fixed_indegree", 'indegree':65600, "multapses": False, "autapses": False},PFPC_conn_param)
-PFPC_conn = nest.GetConnections(GR,PC)
-print("Number of GR-PC synapses: " + str(len(PFPC_conn)))
 
 # Connection 7
 if PLAST1:
