@@ -161,7 +161,7 @@ if PLAST1:
     for i,PCi in enumerate(PC):
         nest.Connect(GR,[PCi],{'rule': 'fixed_indegree', 'indegree': int(0.8*GR_number), "multapses": False},PFPC_conn_param)
         A=nest.GetConnections(GR,[PCi])
-        nest.SetStatus(A,{'vt_num': i})
+        nest.SetStatus(A,{'vt_num': float(i)})
 else:
     PFPC_conn_param = {"model":  "static_synapse",
                        "weight": Init_PFPC,
@@ -191,7 +191,7 @@ if PLAST2:
     for i,DCNi in enumerate(DCN):
         nest.Connect(MF,[DCNi],'all_to_all',MFDCN_conn_param)
         A=nest.GetConnections(MF,[DCNi])
-        nest.SetStatus(A,{'vt_num': i})
+        nest.SetStatus(A,{'vt_num': float(i)})
 else:
     MFDCN_conn_param = {"model":  "static_synapse",
                         "weight": Init_MFDCN,

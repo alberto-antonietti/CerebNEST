@@ -110,7 +110,7 @@ if PLAST1:
     nest.Connect(GR,PC,{'rule': "fixed_indegree", 'indegree':65600, "multapses": False, "autapses": False},PFPC_conn_param)
     for n,PCi in enumerate(PC):
         A=nest.GetConnections(GR,[PCi])
-        nest.SetStatus(A,{'vt_num': n})
+        nest.SetStatus(A,{'vt_num': float(n)})
 
 else:
     PFPC_conn_param = {"model":  "static_synapse",
