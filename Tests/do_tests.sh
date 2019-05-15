@@ -76,7 +76,7 @@ else
   echo "Learning_Performance_Test2.py with 4 Core FAIL"
 fi
 python Remove_Empty.py &>>TestLog.txt
-mv MFDCN-* MFDCN4.csv
+cat MFDCN-* > MFDCN4.csv
 
 python Compare_with_Ground_Truth2.py &>>TestLog.txt
 if [ $? = 0 ]; then

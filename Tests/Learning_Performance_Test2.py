@@ -5,6 +5,9 @@ import nest
 import os
 import errno
 import glob
+from mpi4py import MPI
+
+comm = MPI.COMM_WORLD
 
 nest.Install("albertomodule")
 
@@ -74,7 +77,6 @@ if PLAST2:
     vt2 = nest.Create("volume_transmitter_alberto", DCN_number)
     for n, vti in enumerate(vt2):
         nest.SetStatus([vti], {"vt_num": n})
-
 nest.Connect(InputGen, MF, "one_to_one", {"model": "static_synapse",
                                           "weight": 1.0,
                                           "delay": 1.0
@@ -110,7 +112,6 @@ else:
                                              })
 
 
-
 for i, DCNind in enumerate(DCN):
     MFDCN_conn_param = {"model": 'stdp_synapse_cosexp',
                         "weight": Init_MFDCN,
@@ -126,11 +127,8 @@ for i, DCNind in enumerate(DCN):
         nest.Connect(source.tolist(), [(vt2[i])], {"rule": "all_to_all"}, {'model': 'static_synapse',
                                                                            'delay': 1.0,
                                                                            'weight': 1.0})
-PCVT2_conn = nest.GetConnections(PC, vt2)
-print "Number of PC-Vt2 synapses: " + str(len(PCVT2_conn))
 
-MFDCN_conn = nest.GetConnections(MF, DCN)
-print("Number of MF-DCN synapses: " + str(len(MFDCN_conn)))
+
 
 if RECORDING_CELLS:
     # Create Auxiliary tools
@@ -170,6 +168,10 @@ pyrngs = [np.random.RandomState(s) for s in msdrange1]
 msdrange2 = range(msd + n_vp + 1, msd + 1 + 2 * n_vp)
 nest.SetKernelStatus({'grng_seed': msd + n_vp,
                       'rng_seeds': msdrange2})
+
+
+
+print( str(comm.rank) + " - Number synapses: " + str(len(nest.GetConnections())))
 
 print("### SIMULATION STARTS ###")
 aux.tic()
