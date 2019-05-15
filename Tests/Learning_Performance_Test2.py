@@ -118,7 +118,7 @@ for i,DCNind in enumerate(DCN):
     nest.Connect(MF,[DCNind],{'rule': 'fixed_indegree', 'indegree': 12, "multapses": False, "autapses": False},MFDCN_conn_param)
 
     A=nest.GetConnections(MF,[DCNind])
-    nest.SetStatus(A,{"vt_num": i})
+    nest.SetStatus(A,{"vt_num": float(i)})
     B=nest.GetConnections(PC,[DCNind])
     B=np.array(B)
     if(len(B)>0):

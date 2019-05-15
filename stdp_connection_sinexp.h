@@ -188,7 +188,7 @@ public:
     weight_ = w;
   }
 
-  void set_vt_num( long n ){
+  void set_vt_num( double n ){
    vt_num_ = n;
   }
 
@@ -203,7 +203,7 @@ private:
   // data members of each connection
   double weight_;
 
-  long vt_num_;
+  double vt_num_;
 
   // dopa_spikes_idx_ refers to the dopamine spike that has just been processes
   // after trigger_update_weight a pseudo dopamine spike at t_trig is stored at index 0 and
@@ -226,7 +226,7 @@ template < typename targetidentifierT > STDPSinExpConnection< targetidentifierT 
   , weight_( 1.0 )
   , dopa_spikes_idx_( 0 )
   , t_last_update_( 0.0 )
-  , vt_num_ ( 0 )
+  , vt_num_ ( 0.0 )
   , t_lastspike_( 0.0 )
 {
 }
@@ -237,7 +237,7 @@ template < typename targetidentifierT > STDPSinExpConnection< targetidentifierT 
   , weight_( rhs.weight_ )
   , dopa_spikes_idx_( rhs.dopa_spikes_idx_ )
   , t_last_update_( rhs.t_last_update_ )
-  , vt_num_ ( 0 )
+  , vt_num_ ( rhs.vt_num_ )
   , t_lastspike_( rhs.t_lastspike_ )
 {
 }
@@ -247,7 +247,7 @@ template < typename targetidentifierT > void STDPSinExpConnection< targetidentif
   // base class properties, different for individual synapse
   ConnectionBase::get_status( d );
   def< double >( d, nest::names::weight, weight_ );
-  def< long >( d, "vt_num", vt_num_ );
+  def< double >( d, "vt_num", vt_num_ );
   if ( vt_ != 0 )
   {
     def< long >( d, "modulator", vt_->get_gid() );
@@ -281,7 +281,7 @@ STDPSinExpConnection< targetidentifierT >::set_status( const DictionaryDatum& d,
   // base class properties
   ConnectionBase::set_status( d, cm );
   updateValue< double >( d, nest::names::weight, weight_ );
-  updateValue< long >( d, "vt_num", vt_num_ );
+  updateValue< double >( d, "vt_num", vt_num_ );
   long vtgid;
   if ( updateValue< long >( d, nest::names::vt, vtgid ) )
   {
@@ -349,7 +349,7 @@ STDPSinExpConnection< targetidentifierT >::process_dopa_spikes_(
   // process dopa spikes in (t0, t1]
   // propagate weight from t0 to t1
   if ( ( dopa_spikes.size() > dopa_spikes_idx_ ) &&
-       ( dopa_spikes[ dopa_spikes_idx_ ].spike_time_ <= t1 && dopa_spikes[ dopa_spikes_idx_+1 ].multiplicity_ == vt_num_) )
+       ( dopa_spikes[ dopa_spikes_idx_ ].spike_time_ <= t1 && dopa_spikes[ dopa_spikes_idx_+1 ].multiplicity_ == int (vt_num_ ) ) )
   {
     // A IO SPIKE IS DETECTED AT TIME T0, LTD happens with a different amplitude, it depends on the distance between IO SPIKE and PF spikes
     update_dopamine_( dopa_spikes, cp );

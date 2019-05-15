@@ -20,7 +20,7 @@ conn_param1 = {"model":    'stdp_synapse_sinexp',
 
 nest.Connect(PRE,POST,{'rule': 'one_to_one'},conn_param1)
 A=nest.GetConnections(PRE,POST)
-nest.SetStatus(A,{'vt_num': 0})
+nest.SetStatus(A,{'vt_num': 0.0})
 
 conn_param2 = {"model":    'stdp_synapse_cosexp',
                "A_minus": -0.01,   # double - Amplitude of weight change for depression
@@ -32,6 +32,6 @@ conn_param2 = {"model":    'stdp_synapse_cosexp',
 
 nest.Connect(POST,PRE,{'rule': 'one_to_one'},conn_param2)
 A=nest.GetConnections(POST,PRE)
-nest.SetStatus(A,{'vt_num': 0})
+nest.SetStatus(A,{'vt_num': 0.0})
 
 sys.exit(0) #Everything went fine
