@@ -4,9 +4,9 @@ import os
 import glob
 
 # Building the Weight Matrix Ground Truth
-Weight_Matrix=np.loadtxt("MFDCN.dat")
-SimResults1 = np.loadtxt("MFDCN1.csv")
-SimResults4 = np.loadtxt("MFDCN4.csv")
+Weight_Matrix=np.loadtxt("iSTDP.dat")
+SimResults1 = np.loadtxt("iSTDP1.csv")
+SimResults4 = np.loadtxt("iSTDP4.csv")
 
 print( ["Length Ground Truth: " +  str(len(Weight_Matrix)) + " Length Simulation1 Results: " + str(len(SimResults1)) + " Length Simulation4 Results: " + str(len(SimResults4)) ])
 
