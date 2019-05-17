@@ -58,7 +58,7 @@ fi
 python Remove_Empty.py &>>TestLog.txt
 cat PFPC-* > PFPC4.csv
 
-python Compare_with_Ground_Truth.py &>>TestLog.txt
+python Compare_with_Ground_Truth1.py &>>TestLog.txt
 if [ $? = 0 ]; then
   echo "Weights with 1 and 4 Cores are the same SUCCESS"
 else
