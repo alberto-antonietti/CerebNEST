@@ -96,7 +96,7 @@ MF_number = 300
 GR_number = MF_number*20
 PC_number = 72
 IO_number = PC_number
-DCN_number = PC_number/2
+DCN_number = int(PC_number/2)
 
 
 MF = nest.Create("granular_neuron", MF_number)
@@ -212,7 +212,7 @@ for P in range(PC_number):
         count_DCN+=1
 PCDCN_conn = nest.GetConnections(PC,DCN)
 
-CLOSED_LOOP_P = nest.Create("closed_loop_neuron",IO_number/2,{'gain' : CR_Threshold,
+CLOSED_LOOP_P = nest.Create("closed_loop_neuron",int(IO_number/2),{'gain' : CR_Threshold,
                                                               'num_dcn' : float(DCN_number),
                                                               'first_dcn' : float(DCN[0]),
                                                               'positive' : True,
@@ -222,7 +222,7 @@ CLOSED_LOOP_P = nest.Create("closed_loop_neuron",IO_number/2,{'gain' : CR_Thresh
                                                               'Tstop' : US_Duration,
                                                               'Tduration' : TrialDuration,
                                                               'phase' : NumAcq1 })
-CLOSED_LOOP_N = nest.Create("closed_loop_neuron",IO_number/2,{'gain' : 0.0,
+CLOSED_LOOP_N = nest.Create("closed_loop_neuron",int(IO_number/2),{'gain' : 0.0,
                                                               'num_dcn' : float(DCN_number),
                                                               'first_dcn' : float(DCN[0]),
                                                               'positive' : False,
@@ -237,8 +237,8 @@ nest.SetStatus([CLOSED_LOOP_P[0]],{'to_file' : True})
 
 nest.Connect(DCN,CLOSED_LOOP_P,'all_to_all')
 nest.Connect(DCN,CLOSED_LOOP_N,'all_to_all')
-nest.Connect(CLOSED_LOOP_P,IO[:IO_number/2],'one_to_one',{'weight' : 100.0})
-nest.Connect(CLOSED_LOOP_N,IO[IO_number/2:],'one_to_one',{'weight' : 100.0})
+nest.Connect(CLOSED_LOOP_P,IO[:int(IO_number/2)],'one_to_one',{'weight' : 100.0})
+nest.Connect(CLOSED_LOOP_N,IO[int(IO_number/2):],'one_to_one',{'weight' : 100.0})
 
 nest.PrintNetwork(2)
 
@@ -279,7 +279,7 @@ msdrange2=range(msd+n_vp+1, msd+1+2*n_vp)
 nest.SetKernelStatus({'grng_seed' : msd+n_vp,
                       'rng_seeds' : msdrange2})
 
-print "### SIMULATION STARTS ###"
+print("### SIMULATION STARTS ###")
 nest.Simulate(TrialDuration*NumTrial)
 
 aux.toc()

@@ -5,12 +5,9 @@ import nest
 import os
 import errno
 import glob
-from mpi4py import MPI
 
 #@profile
 def main():
-    comm = MPI.COMM_WORLD
-
     nest.Install("albertomodule")
 
     # Cell numbers
@@ -136,7 +133,7 @@ def main():
 
 
 
-    print( str(comm.rank) + " - Number synapses: " + str(len(nest.GetConnections())))
+    print( " - Number synapses: " + str(len(nest.GetConnections())))
 
     print("### SIMULATION STARTS ###")
     aux.tic()
