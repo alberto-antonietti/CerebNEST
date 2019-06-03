@@ -177,6 +177,7 @@ public:
   check_connection( nest::Node& s,
     nest::Node& t,
     nest::rport receptor_type,
+    double t_lastspike,
     const CommonPropertiesType& cp )
   {
     ConnTestDummyNode dummy_target;
