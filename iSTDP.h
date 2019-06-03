@@ -262,15 +262,15 @@ iSTDP< targetidentifierT >::send( nest::Event& e,
   double dtn_;
   while ( start != finish )
   {
-    //std::cout << start->t_ << "\t"<< t_lastspike_ << "\t" << t_spike  << std::endl;
+    //std::cout << start->t_ << "\t"<< t_lastspike << "\t" << t_spike  << std::endl;
     dtp_ = t_spike - ( start -> t_ );
     Kplus_ = calculate_k_( dtp_ );
     // std::cout << Kplus_ << std::endl;
     weight_ = facilitate_( weight_, Kplus_ );
 
-    if( t_lastspike_ > 0 )
+    if( t_lastspike > 0 )
     {
-      dtn_ = ( start -> t_ ) - t_lastspike_;
+      dtn_ = ( start -> t_ ) - t_lastspike;
       Kplus_ = calculate_k_( dtn_ );
       // std::cout << start ->t_<< std::endl;
       weight_ = facilitate_( weight_, Kplus_ );
