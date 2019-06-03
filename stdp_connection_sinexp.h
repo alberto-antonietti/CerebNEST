@@ -140,7 +140,7 @@ public:
 
   void set_status( const DictionaryDatum& d, nest::ConnectorModel& cm );
 
-  void send( nest::Event& e, nest::thread t, const STDPSinExpCommonProperties& cp );
+  void send( nest::Event& e, nest::thread t, double, const STDPSinExpCommonProperties& cp );
 
   void trigger_update_weight( nest::thread t,
     const std::vector< nest::spikecounter >& dopa_spikes, double t_trig, const STDPSinExpCommonProperties& cp );
@@ -171,7 +171,7 @@ public:
    * \param s The source node
    * \param r The target node
    * \param receptor_type The ID of the requested receptor type
-   * \param t_lastspike_ last spike produced by presynaptic neuron (in ms)
+   * \param t_lastspike last spike produced by presynaptic neuron (in ms)
    */
   void
   check_connection( nest::Node& s,
@@ -181,7 +181,7 @@ public:
   {
     ConnTestDummyNode dummy_target;
     ConnectionBase::check_connection_( dummy_target, s, t, receptor_type );
-    t.register_stdp_connection( t_lastspike_ - get_delay(), get_delay() );
+    t.register_stdp_connection( t_lastspike - get_delay() );
   }
 
   void set_weight( double w ){
@@ -213,7 +213,6 @@ private:
   // time of last update, which is either time of last presyn. spike or time-driven update
   double t_last_update_;
 
-  double t_lastspike_;
 };
 
 //
@@ -227,7 +226,6 @@ template < typename targetidentifierT > STDPSinExpConnection< targetidentifierT 
   , dopa_spikes_idx_( 0 )
   , t_last_update_( 0.0 )
   , vt_num_ ( 0.0 )
-  , t_lastspike_( 0.0 )
 {
 }
 
@@ -238,7 +236,6 @@ template < typename targetidentifierT > STDPSinExpConnection< targetidentifierT 
   , dopa_spikes_idx_( rhs.dopa_spikes_idx_ )
   , t_last_update_( rhs.t_last_update_ )
   , vt_num_ ( rhs.vt_num_ )
-  , t_lastspike_( rhs.t_lastspike_ )
 {
 }
 
@@ -366,6 +363,7 @@ template < typename targetidentifierT >
 inline void
 STDPSinExpConnection< targetidentifierT >::send( nest::Event& e,
   nest::thread t,
+  double,
   const STDPSinExpCommonProperties& cp )
 {
 
@@ -382,12 +380,11 @@ STDPSinExpConnection< targetidentifierT >::send( nest::Event& e,
   }
   e.set_receiver( *target );
   e.set_weight( weight_ );
-  e.set_delay_steps( get_delay_steps() );
+  e.set_delay( get_delay_steps() );
   e.set_rport( get_rport() );
   e();
 
   t_last_update_ = t_spike;
-  t_lastspike_ = t_spike;
 }
 
 template < typename targetidentifierT >
