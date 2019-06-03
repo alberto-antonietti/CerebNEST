@@ -109,6 +109,7 @@ public:
    */
   void send( nest::Event& e,
     nest::thread t,
+	double t_lastspike,
     const nest::CommonSynapseProperties& cp );
 
   class ConnTestDummyNode : public nest::ConnTestDummyNodeBase
@@ -128,13 +129,14 @@ public:
   check_connection( nest::Node& s,
     nest::Node& t,
     nest::rport receptor_type,
+	double t_lastspike,
     const CommonPropertiesType& )
   {
     ConnTestDummyNode dummy_target;
 
     ConnectionBase::check_connection_( dummy_target, s, t, receptor_type );
 
-    t.register_stdp_connection( t_lastspike_ - get_delay(), get_delay() );
+    t.register_stdp_connection( t_lastspike - get_delay() );
   }
 
   void
@@ -463,7 +465,6 @@ private:
   std::vector<double> Frequencies;
   std::vector<double> Doppio;
   std::vector<double> Amplitudes;
-  double t_lastspike_;
 };
 
 
@@ -471,13 +472,14 @@ private:
  * Send an event to the receiver of this connection.
  * \param e The event to send
  * \param t The thread on which this connection is stored.
- * \param t_lastspike_ Time point of last spike emitted
+ * \param t_lastspike Time point of last spike emitted
  * \param cp Common properties object, containing the stdp parameters.
  */
 template < typename targetidentifierT >
 inline void
 Sgritta2017< targetidentifierT >::send( nest::Event& e,
   nest::thread t,
+  double t_lastspike,
   const nest::CommonSynapseProperties& )
 {
   double t_spike = e.get_stamp().get_ms();
@@ -500,7 +502,7 @@ Sgritta2017< targetidentifierT >::send( nest::Event& e,
   // incremented by Archiving_Node::register_stdp_connection(). See bug #218 for
   // details.
   target->get_history(
-    t_lastspike_ - dendritic_delay, t_spike - dendritic_delay, &start, &finish );
+    t_lastspike - dendritic_delay, t_spike - dendritic_delay, &start, &finish );
 
 
   W = mu_plus_;
@@ -508,7 +510,7 @@ Sgritta2017< targetidentifierT >::send( nest::Event& e,
 
   while ( start != finish )
   {
-    //std::cout << start->t_ << "\t"<< t_lastspike_ << "\t" << t_spike  << std::endl;
+    //std::cout << start->t_ << "\t"<< t_lastspike << "\t" << t_spike  << std::endl;
     posF = (int) ( t_spike / resolution + 0.5 );
     deltaT = (int)( ( t_spike - t_old ) / resolution + 0.5 );
     //std::cout << t_spike << " pre"<< std::endl;
@@ -536,7 +538,7 @@ Sgritta2017< targetidentifierT >::send( nest::Event& e,
         Kplus_ = calculate_k_( dtp_ );
         alpha = CalculateMultiplier( peak );
         weight_ = facilitate_( weight_, Kplus_, alpha, peak );
-        dtn_ = ( start ->t_ ) - t_lastspike_;
+        dtn_ = ( start ->t_ ) - t_lastspike;
         Kplus_ = calculate_k_( dtn_ );
         alpha = CalculateMultiplier( peak );
         weight_ = facilitate_( weight_, Kplus_, alpha, peak );
@@ -565,7 +567,7 @@ Sgritta2017< targetidentifierT >::send( nest::Event& e,
           Kplus_ = calculate_k_( dtp_ );
           alpha = CalculateMultiplier( peak );
           weight_ = facilitate_( weight_, Kplus_, alpha, peak );
-          dtn_ = ( start ->t_) - t_lastspike_;
+          dtn_ = ( start ->t_) - t_lastspike;
           Kplus_ = calculate_k_( dtn_ );
           alpha = CalculateMultiplier( peak );
           weight_ = facilitate_( weight_, Kplus_, alpha, peak );
@@ -628,11 +630,10 @@ Sgritta2017< targetidentifierT >::send( nest::Event& e,
   e.set_weight( weight_ );
   // use accessor functions (inherited from Connection< >) to obtain delay in
   // steps and rport
-  e.set_delay_steps( get_delay_steps() );
+  e.set_delay( get_delay_steps() );
   e.set_rport( get_rport() );
   e();
   
-  t_lastspike_ = t_spike;
 
 }
 
@@ -649,7 +650,6 @@ Sgritta2017< targetidentifierT >::Sgritta2017()
   , Wmax_( 100.0 )
   , Kplus_( 0.0 )
   , Wmin_(-100.0)
-  , t_lastspike_( 0.0 )
 {
 }
 
@@ -666,7 +666,6 @@ Sgritta2017< targetidentifierT >::Sgritta2017(
   , Wmax_( rhs.Wmax_ )
   , Wmin_( rhs.Wmin_ )
   , Kplus_( rhs.Kplus_ )
-  , t_lastspike_( rhs.t_lastspike_ )
 {
 }
 
