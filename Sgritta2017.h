@@ -50,13 +50,9 @@
 #include "dictutils.h"
 
 std::ofstream amp_;
-//std::ofstream OutputFile_;
-//std::ofstream freq_;
 
 namespace mynest
 {
-
-
 // connections are templates of target identifier type (used for pointer /
 // target index addressing) derived from generic connection template
 template < typename targetidentifierT >
@@ -180,7 +176,7 @@ private:
       if ( Frequencies[ i ] < 100 )
       {
         DummyAmp.push_back( Amplitudes[ i ] );
-        //std::cout << i << std::endl;
+       
       }
     }
 
@@ -250,7 +246,6 @@ private:
       }
       mmax = istep;
     }
-  //std::cout << wpi << " " << wpr  << " " << theta << " " << wtemp << " "  << tempr << " " << tempi  << " " << wr << " " << wi << " "<< istep<<std::endl;
   }
 
   void
@@ -280,11 +275,6 @@ private:
         Amplitudes[ i ] = 0;
       }
     }
-    //std::cout << W_int << std::endl;
-    //for (int i = 0; i < W_int; i++)
-    //{
-    //  OutputFile_<< Amplitudes[ i ] << std::endl;
-    //}
   }
 
   void
@@ -294,7 +284,7 @@ private:
     double dT = (t2 - t1) / 1000.0;
     double div = resolution / 1000.0;
     int len = (int)( dT/div + 0.5 );
-    // std::cout << P << std::endl;
+   
     if ( P + 1 < 0 || P + len >= W_int )
     {
       std::cout << " CHECK7 FAIL " << std::endl;
@@ -303,13 +293,10 @@ private:
     for ( int i = P + 1; i <= P + len; i++ )
     {
       Window[ i ] = A * std::exp( -1.0 * b / 0.25 );
-      //OutputFile_ << Window[ i ] << std::endl ;
       b = b + div;
     }
 
     Window[ P+len ] = Window[ P+len ] + 4.0;
-    //std::cout << dT << " " << len << " " << t1/1000 << " " << t2/1000 << std::endl;
-    //std::cout << Window[ P+len ] << " " << P + len << " " << P <<std::endl;
   }
 
   void
@@ -321,8 +308,7 @@ private:
     }
 
     int step = dT - ( ( W_int - 1 ) - posOld );
-    //std::cout << posOld << std::endl;
-    //std::cout << posOld << std::endl;
+   
     if (step<0 || posOld>=W_int)
     {
       std::cout << " CHECK6 FAIL " << " " << step << " " << posOld <<std::endl;
@@ -348,10 +334,6 @@ private:
       Frequencies.push_back( b );
       b = b + stepFreq;
     }
-    //for (int i = 0; i < W_int; i++)
-    //{
-    //  freq_ << Frequencies[ i ] << std::endl;
-    //}
   }
 
   void
@@ -366,7 +348,6 @@ private:
         {
           Doppio.push_back( Window[ j ] );
           j++;
-          //std::cout << j << std::endl;
         }
         else if ( i % 2 != 0 )
         {
@@ -383,7 +364,6 @@ private:
         {
           Doppio[ i ] = Window[ j ];
           j++;
-          //std::cout << j << std::endl;
         }
         else if ( i % 2 != 0 )
         {
@@ -398,7 +378,6 @@ private:
   {
     double k = 2.0 * std::pow( sin( 2 * M_PI * dt * 0.01 ), 5 ) *
       std::exp( -1 * std::abs( 0.0587701241739 *dt ) );
-    //std::cout << k << std::endl;
     return k;
   }
 
@@ -429,7 +408,7 @@ private:
         norm_w = w + ( w * alpha_ * kplus * scaleFactor );
       }
     }
-    // std::cout << norm_w << std::endl;
+   
     return norm_w;
   }
 
@@ -491,14 +470,6 @@ Sgritta2017< targetidentifierT >::send( nest::Event& e,
   std::deque< nest::histentry >::iterator start;
   std::deque< nest::histentry >::iterator finish;
 
-  // For a new synapse, t_lastspike contains the point in time of the last
-  // spike. So we initially read the
-  // history(t_last_spike - dendritic_delay, ..., T_spike-dendritic_delay ]
-  // which increases the access counter for these entries.
-  // At registration, all entries' access counters of
-  // history[ 0, ..., t_last_spike - dendritic_delay ] have been
-  // incremented by Archiving_Node::register_stdp_connection(). See bug #218 for
-  // details.
   target->get_history(
     t_lastspike_ - dendritic_delay, t_spike - dendritic_delay, &start, &finish );
 
@@ -508,19 +479,15 @@ Sgritta2017< targetidentifierT >::send( nest::Event& e,
 
   while ( start != finish )
   {
-    //std::cout << start->t_ << "\t"<< t_lastspike_ << "\t" << t_spike  << std::endl;
     posF = (int) ( t_spike / resolution + 0.5 );
     deltaT = (int)( ( t_spike - t_old ) / resolution + 0.5 );
-    //std::cout << t_spike << " pre"<< std::endl;
+
     if ( pos_old + deltaT  > W_int - 1 && flag != 0 && deltaT < W_int )
     {
-      // std::cout << t_spike << " IF1"<< std::endl;
-      // std::cout << " MOVE PRE " << " " << deltaT << " " << pos_old << " " << flagMove << " " << std::endl;
       MoveWindow(deltaT, pos_old, flagMove);
-      //std::cout << " MOVE POST "<< t << std::endl;
+
       if ( flagMove != 0 )
       {
-        // std::cout <<pos << " IF1"<< std::endl;
         pos = W_int - 1 - deltaT;
         if ( pos < 0 || pos >= W_int )
         {
@@ -528,7 +495,6 @@ Sgritta2017< targetidentifierT >::send( nest::Event& e,
         }
         InstantFreq( t_spike, t_old, pos, Window[ pos ] );
         Duplica( flagMove );
-        //std::cout << "target " << target->get_gid() << " " <<posF << " IF1"<< std::endl;
         four1();
         CalculateA();
         peak = FindPeaks( mu_minus_ );
@@ -540,15 +506,13 @@ Sgritta2017< targetidentifierT >::send( nest::Event& e,
         Kplus_ = calculate_k_( dtn_ );
         alpha = CalculateMultiplier( peak );
         weight_ = facilitate_( weight_, Kplus_, alpha, peak );
-        //std::cout << "PRE" << std::endl;
-        if ( t == 0 )
+       
+        if ( t == 0 && not( p_ == 0 ) )
         {
           amp_ << FindPeaks( mu_minus_ ) << "\t";
-          //std::cout << FindPeaks(mu_minus_) << std::endl;
         }
         if ( flagMove == 0 )
         {
-          //std::cout << "target " << target->get_gid() << posF << " IF2"<< std::endl;
           p = deltaT - ( ( W_int  - 1 ) - pos_old );
           pos = pos_old - p;
           if ( pos < 0 || pos >= W_int )
@@ -569,7 +533,7 @@ Sgritta2017< targetidentifierT >::send( nest::Event& e,
           Kplus_ = calculate_k_( dtn_ );
           alpha = CalculateMultiplier( peak );
           weight_ = facilitate_( weight_, Kplus_, alpha, peak );
-          if ( t == 0 )
+          if ( t == 0 && not( p_ == 0 ) )
           {
             amp_ << FindPeaks( mu_minus_ ) << "\t";
           }
@@ -578,7 +542,6 @@ Sgritta2017< targetidentifierT >::send( nest::Event& e,
     }
     else if ( pos_old + deltaT <= W_int - 1 && flag != 0 )
     {
-      //std::cout << Window.size() << std::endl;
       if ( pos_old < 0 || pos_old >= W_int )
       {
         std::cout << " CHECK3 FAIL " << std::endl;
@@ -587,16 +550,13 @@ Sgritta2017< targetidentifierT >::send( nest::Event& e,
     }
     else if (flag == 0)
     {
-      //OutputFile_.open( "OutputFile.dat" );
-      //freq_.open( "freq.dat" );
-      if (t == 0)
+      if (t == 0 && not( p_ == 0 ) )
       {
         amp_.close();
         amp_.open( "amp.dat", std::ofstream::app );
       }
       Inizializza();
       posF =  posF % W_int;
-      //std::cout << posF << std::endl;
       if (posF < 0 || posF >= W_int )
       {
         std::cout << " CHECK4 FAIL " << std::endl;
@@ -607,13 +567,12 @@ Sgritta2017< targetidentifierT >::send( nest::Event& e,
     t_old = t_spike;
     pos_old = posF;
 
-    if ( t == 0 )
+    if ( t == 0 && not( p_ == 0 ) )
     {
       amp_.flush();
     }
 
     ++start;
-    //std::cout << posF << std::endl;
   }
 
   e.set_receiver( *target );
@@ -650,6 +609,7 @@ Sgritta2017< targetidentifierT >::Sgritta2017()
   , Kplus_( 0.0 )
   , Wmin_(-100.0)
   , t_lastspike_( 0.0 )
+  , p_( 0.0 )
 {
 }
 
@@ -667,6 +627,7 @@ Sgritta2017< targetidentifierT >::Sgritta2017(
   , Wmin_( rhs.Wmin_ )
   , Kplus_( rhs.Kplus_ )
   , t_lastspike_( rhs.t_lastspike_ )
+  , p_( rhs.p_ )
 {
 }
 
@@ -684,6 +645,7 @@ Sgritta2017< targetidentifierT >::get_status( DictionaryDatum& d ) const
   def< double >( d, nest::names::Wmax, Wmax_ );
   def< double >( d, nest::names::Wmin, Wmin_ );
   def< long >( d, nest::names::size_of, sizeof( *this ) );
+  def< double >( d, nest::names::P, p_ );
 }
 
 template < typename targetidentifierT >
@@ -700,7 +662,13 @@ Sgritta2017< targetidentifierT >::set_status( const DictionaryDatum& d,
   updateValue< double >( d, nest::names::mu_minus, mu_minus_ );
   updateValue< double >( d, nest::names::Wmax, Wmax_ );
   updateValue< double >( d, nest::names::Wmin, Wmin_ );
-  amp_ <<std::endl;
+  updateValue< double >( d, names::P, p_ );
+  // only one synapse can write to file
+  if ( not( p_ == 0.0 ) )
+  {
+    std::cout << "WARNING! Sgritta synapse is writing to a file! " << std::endl;
+    amp_ <<std::endl;
+  }
   // check if weight_ and Wmax_ has the same sign
   if ( not( ( ( weight_ >= 0 ) - ( weight_ < 0 ) )
          == ( ( Wmax_ >= 0 ) - ( Wmax_ < 0 ) ) ) )
