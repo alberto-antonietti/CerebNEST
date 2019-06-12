@@ -443,6 +443,7 @@ private:
   std::vector<double> Doppio;
   std::vector<double> Amplitudes;
   double t_lastspike_;
+  double p_;
 };
 
 
