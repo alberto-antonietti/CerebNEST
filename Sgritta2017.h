@@ -663,7 +663,7 @@ Sgritta2017< targetidentifierT >::set_status( const DictionaryDatum& d,
   updateValue< double >( d, nest::names::mu_minus, mu_minus_ );
   updateValue< double >( d, nest::names::Wmax, Wmax_ );
   updateValue< double >( d, nest::names::Wmin, Wmin_ );
-  updateValue< double >( d, names::P, p_ );
+  updateValue< double >( d, nest::names::P, p_ );
   // only one synapse can write to file
   if ( not( p_ == 0.0 ) )
   {
