@@ -50,6 +50,8 @@
 #include "dictutils.h"
 
 std::ofstream amp_;
+std::ofstream window_;
+std::ofstream peak_;
 
 namespace mynest
 {
@@ -176,10 +178,8 @@ private:
       if ( Frequencies[ i ] < 100 )
       {
         DummyAmp.push_back( Amplitudes[ i ] );
-       
       }
     }
-
     max = std::max_element( DummyAmp.begin(), DummyAmp.end() );
     
     m = *max;
@@ -270,10 +270,18 @@ private:
 
     for ( int i = 0; i < W_int; i++ )
     {
-    if (Frequencies[ i ] < 1)
+      if (Frequencies[ i ] < 1)
       {
         Amplitudes[ i ] = 0;
       }
+      if ( p_ != 0.0 )
+      {
+        amp_ << Amplitudes [ i ] << " ";
+      }
+    }
+    if ( p_ != 0.0 )
+    {
+      amp_ << std::endl;
     }
   }
 
@@ -297,6 +305,16 @@ private:
     }
 
     Window[ P+len ] = Window[ P+len ] + 4.0;
+
+    if (p_ != 0 )
+    {
+      for (int i = 0; i < W_int; i++ )
+      {
+        window_ << Window[ i ] << " ";
+      }
+      window_ << std::endl;
+    }
+
   }
 
   void
@@ -417,7 +435,7 @@ private:
   double tau_plus_;
   double lambda_;
   double alpha_;
-  long mu_plus_;
+  long mu_plus_; // Size of the moving windows (in seconds)
   double mu_minus_;
   double Wmax_;
   double Kplus_;
@@ -433,7 +451,7 @@ private:
   int move;
   int posF;
   int pos;
-  int pos_old;
+  int pos_old = 0;
   double deltaT;
   int W;
   int W_int;
@@ -443,7 +461,7 @@ private:
   std::vector<double> Doppio;
   std::vector<double> Amplitudes;
   double t_lastspike_;
-  double p_;
+  double p_; // flag, set to 1.0 only for debugging
 };
 
 
@@ -478,101 +496,87 @@ Sgritta2017< targetidentifierT >::send( nest::Event& e,
   W = mu_plus_;
   W_int = (int) ( ( W * 1000 ) / resolution + 0.5 );
 
+  posF = (int) ( t_spike / resolution + 0.5 );
+  deltaT = (int)( ( t_spike - t_old ) / resolution + 0.5 );
+  // After the first pre-synaptic spike
+  if (flag == 0)
+  {
+    Inizializza();
+    posF =  posF % W_int;
+    if (posF < 0 || posF >= W_int )
+    {
+      std::cout << " CHECK1 FAIL " << std::endl;
+    }
+    Window[ posF ] = 4.0;
+    flag = 1;
+  }
+  // The instantaneous frequency buffer is being filled
+  else if ( pos_old + deltaT < W_int && flag != 0 )
+  {
+    if ( pos_old < 0 || pos_old >= W_int )
+    {
+      std::cout << " CHECK4 FAIL " << std::endl;
+    }
+    InstantFreq( t_spike, t_old, pos_old, Window[ pos_old ] );
+  }
+  else if ( pos_old + deltaT  >= W_int && flag != 0 && deltaT < W_int )
+  {
+    MoveWindow(deltaT, pos_old, flagMove);
+
+    if ( flagMove != 0 )
+    {
+      pos = W_int - 1 - deltaT;
+      if ( pos < 0 || pos >= W_int )
+      {
+        std::cout << " CHECK2 FAIL " << std::endl;
+      }
+      InstantFreq( t_spike, t_old, pos, Window[ pos ] );
+      Duplica( flagMove );
+      four1();
+      CalculateA();
+       
+      if ( t == 0 && p_ != 0.0  )
+      {
+        peak_ << FindPeaks( mu_minus_ ) << "\t";
+      }
+    }
+    else if ( flagMove == 0 )
+    {
+      p = deltaT - ( ( W_int  - 1 ) - pos_old );
+      pos = pos_old - p;
+      if ( pos < 0 || pos >= W_int )
+      {
+        std::cout << " CHECK3 FAIL " << pos << std::endl;
+      }
+      InstantFreq( t_spike, t_old, pos, Window[ pos ]);
+      Duplica( flagMove );
+      four1();
+      CalculateA();
+      flagMove=1;
+      if ( t == 0 && p_ != 0.0 )
+      {
+        peak_ << FindPeaks( mu_minus_ ) << "\t";
+      }
+    }
+  }
+  
+  
+  
+  t_old = t_spike;
+  pos_old = posF;
+
   while ( start != finish )
   {
-    posF = (int) ( t_spike / resolution + 0.5 );
-    deltaT = (int)( ( t_spike - t_old ) / resolution + 0.5 );
-
-    if ( pos_old + deltaT  > W_int - 1 && flag != 0 && deltaT < W_int )
-    {
-      MoveWindow(deltaT, pos_old, flagMove);
-
-      if ( flagMove != 0 )
-      {
-        pos = W_int - 1 - deltaT;
-        if ( pos < 0 || pos >= W_int )
-        {
-          std::cout << " CHECK1 FAIL " << std::endl;
-        }
-        InstantFreq( t_spike, t_old, pos, Window[ pos ] );
-        Duplica( flagMove );
-        four1();
-        CalculateA();
-        peak = FindPeaks( mu_minus_ );
-        dtp_ = ( start ->t_ ) - t_spike;
-        Kplus_ = calculate_k_( dtp_ );
-        alpha = CalculateMultiplier( peak );
-        weight_ = facilitate_( weight_, Kplus_, alpha, peak );
-        dtn_ = ( start ->t_ ) - t_lastspike_;
-        Kplus_ = calculate_k_( dtn_ );
-        alpha = CalculateMultiplier( peak );
-        weight_ = facilitate_( weight_, Kplus_, alpha, peak );
-       
-        if ( t == 0 && not( p_ == 0 ) )
-        {
-          amp_ << FindPeaks( mu_minus_ ) << "\t";
-        }
-        if ( flagMove == 0 )
-        {
-          p = deltaT - ( ( W_int  - 1 ) - pos_old );
-          pos = pos_old - p;
-          if ( pos < 0 || pos >= W_int )
-          {
-            std::cout << " CHECK2 FAIL " << pos << std::endl;
-          }
-          InstantFreq( t_spike, t_old, pos, Window[ pos ]);
-          Duplica( flagMove);
-          four1();
-          CalculateA();
-          flagMove=1;
-          peak = FindPeaks( mu_minus_);
-          dtp_ = ( start ->t_ ) - t_spike;
-          Kplus_ = calculate_k_( dtp_ );
-          alpha = CalculateMultiplier( peak );
-          weight_ = facilitate_( weight_, Kplus_, alpha, peak );
-          dtn_ = ( start ->t_) - t_lastspike_;
-          Kplus_ = calculate_k_( dtn_ );
-          alpha = CalculateMultiplier( peak );
-          weight_ = facilitate_( weight_, Kplus_, alpha, peak );
-          if ( t == 0 && not( p_ == 0 ) )
-          {
-            amp_ << FindPeaks( mu_minus_ ) << "\t";
-          }
-        }
-      }
-    }
-    else if ( pos_old + deltaT <= W_int - 1 && flag != 0 )
-    {
-      if ( pos_old < 0 || pos_old >= W_int )
-      {
-        std::cout << " CHECK3 FAIL " << std::endl;
-      }
-      InstantFreq( t_spike, t_old, pos_old, Window[ pos_old ] );
-    }
-    else if (flag == 0)
-    {
-      if (t == 0 && not( p_ == 0 ) )
-      {
-        amp_.close();
-        amp_.open( "amp.dat", std::ofstream::app );
-      }
-      Inizializza();
-      posF =  posF % W_int;
-      if (posF < 0 || posF >= W_int )
-      {
-        std::cout << " CHECK4 FAIL " << std::endl;
-      }
-      Window[ posF ] = 4.0;
-      flag = 1;
-    }
-    t_old = t_spike;
-    pos_old = posF;
-
-    if ( t == 0 && not( p_ == 0 ) )
-    {
-      amp_.flush();
-    }
-
+    // Delta_t > 0
+    peak = FindPeaks( mu_minus_ );
+    dtp_ = ( start ->t_ ) - t_spike;
+    Kplus_ = calculate_k_( dtp_ );
+    alpha = CalculateMultiplier( peak );
+    weight_ = facilitate_( weight_, Kplus_, alpha, peak );
+    // Delta_t < 0
+	  dtn_ = ( start ->t_ ) - t_lastspike_;
+    Kplus_ = calculate_k_( dtn_ );
+    weight_ = facilitate_( weight_, Kplus_, alpha, peak );
     ++start;
   }
 
@@ -665,10 +669,12 @@ Sgritta2017< targetidentifierT >::set_status( const DictionaryDatum& d,
   updateValue< double >( d, nest::names::Wmin, Wmin_ );
   updateValue< double >( d, nest::names::P, p_ );
   // only one synapse can write to file
-  if ( not( p_ == 0.0 ) )
+  if ( p_ != 0.0 )
   {
     std::cout << "WARNING! Sgritta synapse is writing to a file! " << std::endl;
-    amp_ <<std::endl;
+    window_.open( "window.dat" );
+    amp_.open( "amp.dat" );
+    peak_.open( "peak.dat" );
   }
   // check if weight_ and Wmax_ has the same sign
   if ( not( ( ( weight_ >= 0 ) - ( weight_ < 0 ) )
