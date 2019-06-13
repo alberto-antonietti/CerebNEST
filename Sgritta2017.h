@@ -23,6 +23,10 @@
 #ifndef SGRITTA2017_H
 #define SGRITTA2017_H
 
+// Hard-coded frequency limits
+#define F_MIN 1.0
+#define F_MAX 10.0
+
  /*
 
    Vasco Orza and Alberto Antonietti
@@ -147,7 +151,7 @@ private:
   CalculateMultiplier( double Fpeak )
   {
     double multiplier;
-    if ( Fpeak < 1 || Fpeak > 10 )
+    if ( Fpeak < F_MIN || Fpeak > F_MAX )
     {
       multiplier = 0;
     }
@@ -173,12 +177,11 @@ private:
     std::vector<double>::iterator max;
     double m;
     int index_m;
-    for ( int i = 0; i < W_int; i++ )
+    int i = 0;
+    while ( Frequencies[ i ] < F_MAX )
     {
-      if ( Frequencies[ i ] < 100 )
-      {
-        DummyAmp.push_back( Amplitudes[ i ] );
-      }
+      DummyAmp.push_back( Amplitudes[ i ] );
+      i++;
     }
     max = std::max_element( DummyAmp.begin(), DummyAmp.end() );
     
@@ -270,7 +273,7 @@ private:
 
     for ( int i = 0; i < W_int; i++ )
     {
-      if (Frequencies[ i ] < 1)
+      if (Frequencies[ i ] < F_MIN || Frequencies[ i ] > F_MAX)
       {
         Amplitudes[ i ] = 0;
       }
@@ -552,7 +555,7 @@ Sgritta2017< targetidentifierT >::send( nest::Event& e,
       Duplica( flagMove );
       four1();
       CalculateA();
-      flagMove=1;
+      flagMove = 1;
       if ( t == 0 && p_ != 0.0 )
       {
         peak_ << FindPeaks( mu_minus_ ) << "\t";
