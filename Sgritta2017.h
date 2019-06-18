@@ -24,8 +24,8 @@
 #define SGRITTA2017_H
 
 // Hard-coded frequency limits
-#define F_MIN 1.0
-#define F_MAX 10.0
+#define F_MIN 0.9
+#define F_MAX 10.1
 
  /*
 
@@ -56,6 +56,7 @@
 std::ofstream amp_;
 std::ofstream window_;
 std::ofstream peak_;
+std::ofstream stdp_changes_;
 
 namespace mynest
 {
@@ -417,8 +418,7 @@ private:
         norm_w = w - std::abs( w * alpha_ * kplus * scaleFactor );
       }
     }
-
-    if ( Peak > 2.75 ) // Both LTP and LTD
+    else if ( Peak > 2.75 ) // Both LTP and LTD
     {
       if ( w < 0 )
       {
@@ -428,6 +428,10 @@ private:
       {
         norm_w = w + ( w * alpha_ * kplus * scaleFactor );
       }
+    }
+    else
+    {
+      return w;
     }
    
     return norm_w;
@@ -448,7 +452,6 @@ private:
   double dtn_;
   double t_old;
   double alpha = 0;
-  double peak = 0;
   int flag = 0;
   int flagMove = 0;
   int move;
@@ -570,16 +573,26 @@ Sgritta2017< targetidentifierT >::send( nest::Event& e,
 
   while ( start != finish )
   {
-    // Delta_t > 0
-    peak = FindPeaks( mu_minus_ );
-    dtp_ = ( start ->t_ ) - t_spike;
+    // Delta_t > 0 - causal spikes (pre-synaptic spike -> post-synaptic spike)
+    double peak = FindPeaks( mu_minus_ );
+    dtp_ = ( start ->t_ ) - t_lastspike_; // DeltaT = T_post - T_pre
     Kplus_ = calculate_k_( dtp_ );
     alpha = CalculateMultiplier( peak );
+    double weight_pre = weight_;
     weight_ = facilitate_( weight_, Kplus_, alpha, peak );
-    // Delta_t < 0
-	  dtn_ = ( start ->t_ ) - t_lastspike_;
+    if ( p_ != 0.0 )
+    {
+      stdp_changes_ << ( start ->t_ ) << " " << dtp_ << " " << Kplus_ << " " << alpha << " " << peak << " " << weight_-weight_pre << std::endl;
+    }
+    // Delta_t < 0 anti-causal spikes (post-synaptic spike -> pre-synaptic spike)
+	  dtn_ = ( start ->t_ ) - t_spike; // DeltaT = T_post - T_pre
     Kplus_ = calculate_k_( dtn_ );
+    weight_pre = weight_;
     weight_ = facilitate_( weight_, Kplus_, alpha, peak );
+    if ( p_ != 0.0 )
+    {
+      stdp_changes_ << ( start ->t_ ) << " " << dtn_ << " " << Kplus_ << " " << alpha << " " << peak << " " << weight_-weight_pre << std::endl;
+    }
     ++start;
   }
 
@@ -678,6 +691,7 @@ Sgritta2017< targetidentifierT >::set_status( const DictionaryDatum& d,
     window_.open( "window.dat" );
     amp_.open( "amp.dat" );
     peak_.open( "peak.dat" );
+    stdp_changes_.open( "stdp_changes.dat" );
   }
   // check if weight_ and Wmax_ has the same sign
   if ( not( ( ( weight_ >= 0 ) - ( weight_ < 0 ) )
