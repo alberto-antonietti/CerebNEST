@@ -42,6 +42,7 @@ set( MODULE_SOURCES
     albertomodule.h albertomodule.cpp
     volume_transmitter_alberto.h volume_transmitter_alberto.cpp
     closed_loop_neuron.h closed_loop_neuron.cpp
+    planner_neuron.h planner_neuron.cpp
     radial_basis_function_input.h radial_basis_function_input.cpp
     stdp_connection_cosexp.h stdp_connection_cosexp.cpp
     stdp_connection_sinexp.h stdp_connection_sinexp.cpp
