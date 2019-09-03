@@ -6,6 +6,7 @@ nest.Install("albertomodule")
 VT = nest.Create("volume_transmitter_alberto", 1)
 
 CLOSED = nest.Create("closed_loop_neuron", 1)
+PLANNER = nest.Create("planner_neuron", 1)
 RBF = nest.Create("radial_basis_function_input", 1)
 PRE = nest.Create("iaf_cond_exp", 1)
 POST = nest.Create("iaf_cond_exp", 1)
