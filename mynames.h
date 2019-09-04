@@ -49,6 +49,7 @@ extern const Name sdev;
 
 extern const Name vt_num;
 
+extern const Name rate;
 }
 }
 

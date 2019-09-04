@@ -3,6 +3,9 @@
 
 #include <fstream>
 
+// Includes from librandom:
+#include "poisson_randomdev.h"
+
 // Includes from nestkernel:
 #include "archiving_node.h"
 #include "connection.h"
@@ -21,16 +24,10 @@ public:
   planner_neuron( const planner_neuron& );
   ~planner_neuron();
 
-  /**
-   * Import sets of overloaded virtual functions.
-   * @see Technical Issues / Virtual Functions: Overriding,
-   * Overloading, and Hiding
-   */
   using nest::Node::handle;
   using nest::Node::handles_test_event;
 
   nest::port send_test_event( nest::Node&, nest::rport, nest::synindex, bool );
-  void handle( nest::SpikeEvent& );
   nest::port handles_test_event( nest::SpikeEvent&, nest::rport );
 
   void get_status( DictionaryDatum& ) const;
@@ -39,35 +36,32 @@ public:
 private:
   void init_state_( const nest::Node& proto );
   void init_buffers_();
+
   void calibrate();
   void update( nest::Time const&, const long, const long );
+  void handle( nest::SpikeEvent& );
 
-  librandom::RngPtr rng_;
-
-  //! Model parameters
   struct Parameters_
   {
+    double rate_; //!< process rate in Hz
+
     Parameters_(); //!< Sets default parameter values
 
     void get( DictionaryDatum& ) const; //!< Store current values in dictionary
     void set( const DictionaryDatum& ); //!< Set values from dicitonary
   };
 
-  /**
-   * Internal variables of the model.
-   */
   struct Variables_
   {
+    librandom::PoissonRandomDev poisson_dev_; //!< Random deviate generator
   };
+
   Parameters_ P_;
   Variables_ V_;
 };
 
 inline nest::port
-planner_neuron::send_test_event( nest::Node& target,
-  nest::rport receptor_type,
-  nest::synindex,
-  bool )
+planner_neuron::send_test_event( nest::Node& target, nest::rport receptor_type, nest::synindex, bool )
 {
   nest::SpikeEvent e;
   e.set_sender( *this );
@@ -78,13 +72,11 @@ planner_neuron::send_test_event( nest::Node& target,
 inline nest::port
 planner_neuron::handles_test_event( nest::SpikeEvent&, nest::rport receptor_type )
 {
-  // Allow connections only to port 0
-  if ( receptor_type == 0 )
+  if ( receptor_type != 0 )
   {
-    return receptor_type;
-  }
-  else
     throw nest::UnknownReceptorType( receptor_type, get_name() );
+  }
+  return 0;
 }
 
 inline void
@@ -92,8 +84,6 @@ planner_neuron::get_status( DictionaryDatum& d ) const
 {
   P_.get( d );
   nest::Archiving_Node::get_status( d );
-
-  //( *d )[ names::recordables ] = recordablesMap_.get_list();
 }
 
 inline void

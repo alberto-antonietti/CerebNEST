@@ -7,6 +7,8 @@
 #include <limits>
 #include <fstream>
 
+#include "poisson_generator.h"
+
 // Includes from libnestutil:
 #include "numerics.h"
 
@@ -27,6 +29,7 @@
  * ---------------------------------------------------------------- */
 
 mynest::planner_neuron::Parameters_::Parameters_()
+  : rate_( 0.0 )
 {
 }
 
@@ -37,12 +40,13 @@ mynest::planner_neuron::Parameters_::Parameters_()
 void
 mynest::planner_neuron::Parameters_::get( DictionaryDatum& d ) const
 {
+  def< double >( d, mynames::rate, rate_ );
 }
 
 void
 mynest::planner_neuron::Parameters_::set( const DictionaryDatum& d )
 {
-  // allow setting the neuron parameters
+  updateValue< double >( d, mynames::rate, rate_ );
 }
 
 /* ----------------------------------------------------------------
@@ -85,16 +89,31 @@ mynest::planner_neuron::init_buffers_()
 void
 mynest::planner_neuron::calibrate()
 {
-  rng_ = nest::kernel().rng_manager.get_rng( get_thread() );
+  V_.poisson_dev_.set_lambda( nest::Time::get_resolution().get_ms() * P_.rate_ * 1e-3 );
 }
 
 
 void
 mynest::planner_neuron::update( nest::Time const& origin, const long from, const long to )
 {
-  assert(
-    to >= 0 && ( nest::delay ) from < nest::kernel().connection_manager.get_min_delay() );
+  assert( to >= 0 );
+  assert( static_cast<nest::delay>(from) < nest::kernel().connection_manager.get_min_delay() );
   assert( from < to );
+
+  librandom::RngPtr rng = nest::kernel().rng_manager.get_rng( get_thread() );
+
+  for ( long lag = from; lag < to; ++lag )
+  {
+    long n_spikes = V_.poisson_dev_.ldev( rng );
+
+    if ( n_spikes > 0 ) // we must not send events with multiplicity 0
+    {
+      nest::SpikeEvent se;
+
+      se.set_multiplicity( n_spikes );
+      nest::kernel().event_delivery_manager.send( *this, se, lag );
+    }
+  }
 }
 
 void
