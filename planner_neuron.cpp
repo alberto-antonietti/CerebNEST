@@ -29,7 +29,8 @@
  * ---------------------------------------------------------------- */
 
 mynest::planner_neuron::Parameters_::Parameters_()
-  : rate_( 0.0 )
+  : rate_( 10.0 )
+  , trial_length_( 1000 )
 {
 }
 
@@ -41,12 +42,18 @@ void
 mynest::planner_neuron::Parameters_::get( DictionaryDatum& d ) const
 {
   def< double >( d, mynames::rate, rate_ );
+  def< long >( d, mynames::trial_length, trial_length_ );
 }
 
 void
 mynest::planner_neuron::Parameters_::set( const DictionaryDatum& d )
 {
   updateValue< double >( d, mynames::rate, rate_ );
+  updateValue< long >( d, mynames::trial_length, trial_length_ );
+  if ( trial_length_ <= 0 )
+  {
+    throw nest::BadProperty( "The trial length cannot be zero or negative." );
+  }
 }
 
 /* ----------------------------------------------------------------
@@ -83,13 +90,32 @@ mynest::planner_neuron::init_state_( const Node& proto )
 void
 mynest::planner_neuron::init_buffers_()
 {
+  B_.spike_mult.clear();
+  B_.spike_lag.clear();
   Archiving_Node::clear_history();
 }
 
 void
 mynest::planner_neuron::calibrate()
 {
-  V_.poisson_dev_.set_lambda( nest::Time::get_resolution().get_ms() * P_.rate_ * 1e-3 );
+  double time_res = nest::Time::get_resolution().get_ms();  // 0.1
+  long from = 0;
+  long to = (double)P_.trial_length_ / time_res;
+
+  librandom::RngPtr rng = nest::kernel().rng_manager.get_rng( get_thread() );
+
+  V_.poisson_dev_.set_lambda( time_res * P_.rate_ * 1e-3 );
+
+  for (long lag = from; lag < to; ++lag )
+  {
+    long n_spikes = V_.poisson_dev_.ldev( rng );
+
+    if ( n_spikes > 0 ) // we must not send events with multiplicity 0
+    {
+      B_.spike_mult.push_back( n_spikes );
+      B_.spike_lag.push_back( lag );
+    }
+  }
 }
 
 
@@ -100,15 +126,18 @@ mynest::planner_neuron::update( nest::Time const& origin, const long from, const
   assert( static_cast<nest::delay>(from) < nest::kernel().connection_manager.get_min_delay() );
   assert( from < to );
 
-  librandom::RngPtr rng = nest::kernel().rng_manager.get_rng( get_thread() );
+  double time_res = nest::Time::get_resolution().get_ms();  // 0.1
+  long trial_len_ticks = (double)P_.trial_length_ / time_res;
 
-  for ( long lag = from; lag < to; ++lag )
+  long const T = origin.get_steps() + from;
+
+  if ( T % trial_len_ticks == 0 )
   {
-    long n_spikes = V_.poisson_dev_.ldev( rng );
-
-    if ( n_spikes > 0 ) // we must not send events with multiplicity 0
+    for ( size_t i = 0; i < B_.spike_lag.size(); i++ )
     {
       nest::SpikeEvent se;
+      int n_spikes = B_.spike_mult[i];
+      long lag = B_.spike_lag[i];  // it works fine without adding any offset
 
       se.set_multiplicity( n_spikes );
       nest::kernel().event_delivery_manager.send( *this, se, lag );
