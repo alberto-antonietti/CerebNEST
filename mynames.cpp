@@ -35,5 +35,6 @@ const Name sdev( "sdev" );
 const Name vt_num( "vt_num" );
 
 const Name rate( "rate" );
+const Name trial_length( "trial_length" );
 }
 }

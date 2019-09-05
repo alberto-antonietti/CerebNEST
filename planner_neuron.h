@@ -41,9 +41,16 @@ private:
   void update( nest::Time const&, const long, const long );
   void handle( nest::SpikeEvent& );
 
+  struct Buffers_
+  {
+    std::vector<int> spike_mult;
+    std::vector<long> spike_lag;
+  };
+
   struct Parameters_
   {
     double rate_; //!< process rate in Hz
+    long trial_length_; //!< process rate in Hz
 
     Parameters_(); //!< Sets default parameter values
 
@@ -56,6 +63,7 @@ private:
     librandom::PoissonRandomDev poisson_dev_; //!< Random deviate generator
   };
 
+  Buffers_ B_;
   Parameters_ P_;
   Variables_ V_;
 };
