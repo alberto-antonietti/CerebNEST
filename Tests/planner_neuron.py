@@ -5,10 +5,17 @@ import nest
 nest.Install("albertomodule")
 
 
-def run_simulation(trial_len, sim_len):
+def run_simulation(trial_len, sim_len, target=0.0, prism=0.0):
     nest.ResetKernel()
 
-    planner = nest.Create("planner_neuron", params={"trial_length": trial_len})
+    planner = nest.Create(
+        "planner_neuron",
+        params={
+            "trial_length": trial_len,
+            "target": target,
+            "prism_deviation": prism
+            }
+        )
 
     spikedetector = nest.Create("spike_detector")
     nest.Connect(planner, spikedetector)
@@ -36,6 +43,18 @@ def test_poisson():
     # pylab.show()
 
 
+def test_rate():
+    evs, ts = run_simulation(1000, 1000, 0.0, 0.0)
+    assert(len(evs) == 8)
+
+    evs, ts = run_simulation(1000, 1000, 10.0, 0.0)
+    assert(len(evs) == 91)
+
+    evs, ts = run_simulation(1000, 1000, 10.0, 5.0)
+    assert(len(evs) == 150)
+    # print(len(evs), "spikes")
+
+
 def test_periodicity(trial_len=1000, sim_len=3000):
     _, ts = run_simulation(trial_len, sim_len)
 
@@ -53,3 +72,4 @@ test_periodicity(1000, 3000)
 test_periodicity(500, 1000)
 test_periodicity(100, 500)
 test_poisson()
+test_rate()
