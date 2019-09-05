@@ -30,6 +30,8 @@
 
 mynest::planner_neuron::Parameters_::Parameters_()
   : trial_length_( 1000 )
+  , target_( 0.0 )
+  , prism_deviation_( 0.0 )
 {
 }
 
@@ -41,6 +43,8 @@ void
 mynest::planner_neuron::Parameters_::get( DictionaryDatum& d ) const
 {
   def< long >( d, mynames::trial_length, trial_length_ );
+  def< double >( d, mynames::target, target_ );
+  def< double >( d, mynames::prism_deviation, prism_deviation_ );
 }
 
 void
@@ -51,6 +55,9 @@ mynest::planner_neuron::Parameters_::set( const DictionaryDatum& d )
   {
     throw nest::BadProperty( "The trial length cannot be zero or negative." );
   }
+
+  updateValue< double >( d, mynames::target, target_ );
+  updateValue< double >( d, mynames::prism_deviation, prism_deviation_ );
 }
 
 /* ----------------------------------------------------------------
@@ -95,7 +102,7 @@ mynest::planner_neuron::init_buffers_()
 void
 mynest::planner_neuron::calibrate()
 {
-  V_.rate_ = 10.0;
+  V_.rate_ = std::max(0.0, 10.0 + 10.0 * (P_.target_ + P_.prism_deviation_));
 
   double time_res = nest::Time::get_resolution().get_ms();  // 0.1
   long from = 0;

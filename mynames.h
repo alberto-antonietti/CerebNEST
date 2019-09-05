@@ -49,8 +49,9 @@ extern const Name sdev;
 
 extern const Name vt_num;
 
-extern const Name rate;
 extern const Name trial_length;
+extern const Name target;
+extern const Name prism_deviation;
 }
 }
 

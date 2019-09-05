@@ -34,7 +34,8 @@ const Name Tduration( "Tduration" );
 const Name sdev( "sdev" );
 const Name vt_num( "vt_num" );
 
-const Name rate( "rate" );
 const Name trial_length( "trial_length" );
+const Name target( "target" );
+const Name prism_deviation( "prism_deviation" );
 }
 }
