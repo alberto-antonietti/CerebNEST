@@ -29,8 +29,7 @@
  * ---------------------------------------------------------------- */
 
 mynest::planner_neuron::Parameters_::Parameters_()
-  : rate_( 10.0 )
-  , trial_length_( 1000 )
+  : trial_length_( 1000 )
 {
 }
 
@@ -41,14 +40,12 @@ mynest::planner_neuron::Parameters_::Parameters_()
 void
 mynest::planner_neuron::Parameters_::get( DictionaryDatum& d ) const
 {
-  def< double >( d, mynames::rate, rate_ );
   def< long >( d, mynames::trial_length, trial_length_ );
 }
 
 void
 mynest::planner_neuron::Parameters_::set( const DictionaryDatum& d )
 {
-  updateValue< double >( d, mynames::rate, rate_ );
   updateValue< long >( d, mynames::trial_length, trial_length_ );
   if ( trial_length_ <= 0 )
   {
@@ -98,13 +95,15 @@ mynest::planner_neuron::init_buffers_()
 void
 mynest::planner_neuron::calibrate()
 {
+  V_.rate_ = 10.0;
+
   double time_res = nest::Time::get_resolution().get_ms();  // 0.1
   long from = 0;
   long to = (double)P_.trial_length_ / time_res;
 
   librandom::RngPtr rng = nest::kernel().rng_manager.get_rng( get_thread() );
 
-  V_.poisson_dev_.set_lambda( time_res * P_.rate_ * 1e-3 );
+  V_.poisson_dev_.set_lambda( time_res * V_.rate_ * 1e-3 );
 
   for (long lag = from; lag < to; ++lag )
   {
