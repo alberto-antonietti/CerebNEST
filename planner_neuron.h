@@ -49,8 +49,7 @@ private:
 
   struct Parameters_
   {
-    double rate_; //!< process rate in Hz
-    long trial_length_; //!< process rate in Hz
+    long trial_length_;
 
     Parameters_(); //!< Sets default parameter values
 
@@ -60,6 +59,7 @@ private:
 
   struct Variables_
   {
+    double rate_; //!< process rate in Hz
     librandom::PoissonRandomDev poisson_dev_; //!< Random deviate generator
   };
 
