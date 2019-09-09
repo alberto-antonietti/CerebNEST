@@ -13,7 +13,9 @@ def run_simulation(trial_len, sim_len, target=0.0, prism=0.0):
         params={
             "trial_length": trial_len,
             "target": target,
-            "prism_deviation": prism
+            "prism_deviation": prism,
+            "baseline_rate": 10.0,
+            "gain_rate": 10.0,
             }
         )
 

@@ -37,5 +37,7 @@ const Name vt_num( "vt_num" );
 const Name trial_length( "trial_length" );
 const Name target( "target" );
 const Name prism_deviation( "prism_deviation" );
+const Name baseline_rate( "baseline_rate" );
+const Name gain_rate( "gain_rate" );
 }
 }
