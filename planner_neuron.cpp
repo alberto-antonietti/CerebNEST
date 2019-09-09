@@ -32,6 +32,8 @@ mynest::planner_neuron::Parameters_::Parameters_()
   : trial_length_( 1000 )
   , target_( 0.0 )
   , prism_deviation_( 0.0 )
+  , baseline_rate_( 10.0 )
+  , gain_rate_( 10.0 )
 {
 }
 
@@ -45,6 +47,8 @@ mynest::planner_neuron::Parameters_::get( DictionaryDatum& d ) const
   def< long >( d, mynames::trial_length, trial_length_ );
   def< double >( d, mynames::target, target_ );
   def< double >( d, mynames::prism_deviation, prism_deviation_ );
+  def< double >( d, mynames::baseline_rate, baseline_rate_ );
+  def< double >( d, mynames::gain_rate, gain_rate_ );
 }
 
 void
@@ -58,6 +62,8 @@ mynest::planner_neuron::Parameters_::set( const DictionaryDatum& d )
 
   updateValue< double >( d, mynames::target, target_ );
   updateValue< double >( d, mynames::prism_deviation, prism_deviation_ );
+  updateValue< double >( d, mynames::baseline_rate, baseline_rate_ );
+  updateValue< double >( d, mynames::gain_rate, gain_rate_ );
 }
 
 /* ----------------------------------------------------------------
@@ -102,7 +108,8 @@ mynest::planner_neuron::init_buffers_()
 void
 mynest::planner_neuron::calibrate()
 {
-  V_.rate_ = std::max(0.0, 10.0 + 10.0 * (P_.target_ + P_.prism_deviation_));
+  double rate = P_.baseline_rate_ + P_.gain_rate_ * (P_.target_ + P_.prism_deviation_);
+  V_.rate_ = std::max(0.0, rate);
 
   double time_res = nest::Time::get_resolution().get_ms();  // 0.1
   long from = 0;

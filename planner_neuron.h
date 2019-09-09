@@ -52,6 +52,8 @@ private:
     long trial_length_;
     double target_;
     double prism_deviation_;
+    double baseline_rate_;
+    double gain_rate_;
 
     Parameters_(); //!< Sets default parameter values
 
