@@ -78,7 +78,7 @@ def test_recurrency():
     trial_t = 300
     evs, ts = run_simulation(trial_t, trial_t, n=n)
 
-    x = np.zeros([trial_t/delta_t, n])
+    x = np.zeros([trial_t//delta_t, n])
 
     for (n_id, t) in zip(evs, ts):
         if t >= trial_t:  # FIXME in planner_neuron
