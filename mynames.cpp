@@ -39,5 +39,7 @@ const Name target( "target" );
 const Name prism_deviation( "prism_deviation" );
 const Name baseline_rate( "baseline_rate" );
 const Name gain_rate( "gain_rate" );
+const Name joint_id( "joint_id" );
+const Name fiber_id( "fiber_id" );
 }
 }

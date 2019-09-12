@@ -30,8 +30,8 @@
 
 mynest::cortex_neuron::Parameters_::Parameters_()
   : trial_length_( 1000 )
-  , target_( 0.0 )
-  , prism_deviation_( 0.0 )
+  , joint_id_( 0 )
+  , fiber_id_( 0 )
   , baseline_rate_( 10.0 )
   , gain_rate_( 10.0 )
 {
@@ -45,8 +45,8 @@ void
 mynest::cortex_neuron::Parameters_::get( DictionaryDatum& d ) const
 {
   def< long >( d, mynames::trial_length, trial_length_ );
-  def< double >( d, mynames::target, target_ );
-  def< double >( d, mynames::prism_deviation, prism_deviation_ );
+  def< long >( d, mynames::joint_id, joint_id_ );
+  def< long >( d, mynames::fiber_id, fiber_id_ );
   def< double >( d, mynames::baseline_rate, baseline_rate_ );
   def< double >( d, mynames::gain_rate, gain_rate_ );
 }
@@ -59,9 +59,8 @@ mynest::cortex_neuron::Parameters_::set( const DictionaryDatum& d )
   {
     throw nest::BadProperty( "The trial length cannot be zero or negative." );
   }
-
-  updateValue< double >( d, mynames::target, target_ );
-  updateValue< double >( d, mynames::prism_deviation, prism_deviation_ );
+  updateValue< long >( d, mynames::joint_id, joint_id_ );
+  updateValue< long >( d, mynames::fiber_id, fiber_id_ );
   updateValue< double >( d, mynames::baseline_rate, baseline_rate_ );
   updateValue< double >( d, mynames::gain_rate, gain_rate_ );
 }
@@ -108,9 +107,6 @@ mynest::cortex_neuron::init_buffers_()
 void
 mynest::cortex_neuron::calibrate()
 {
-  // double rate = P_.baseline_rate_ + P_.gain_rate_ * (P_.target_ + P_.prism_deviation_);
-  // V_.rate_ = std::max(0.0, rate);
-
   double time_res = nest::Time::get_resolution().get_ms();  // 0.1
   long from = 0;
   long to = (double)P_.trial_length_ / time_res;
@@ -120,7 +116,10 @@ mynest::cortex_neuron::calibrate()
   for (long lag = from; lag < to; ++lag )
   {
     double t = ( from + lag ) * time_res * 1e-3;  // [s]
-    double rate = 100 * std::abs( std::sin( 2*M_PI * t ) );
+    double sdev = 10;
+    double mean = P_.fiber_id_;
+    double desired = 100 * ( 0.5 + 0.5*std::sin( 2*M_PI * t ) );
+    double rate = P_.baseline_rate_ * exp(-pow(((desired - mean) / sdev), 2 ));
 
     V_.poisson_dev_.set_lambda( time_res * rate * 1e-3 );
 

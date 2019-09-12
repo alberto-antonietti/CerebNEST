@@ -50,8 +50,8 @@ private:
   struct Parameters_
   {
     long trial_length_;
-    double target_;
-    double prism_deviation_;
+    long joint_id_;
+    long fiber_id_;
     double baseline_rate_;
     double gain_rate_;
 

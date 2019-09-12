@@ -29,6 +29,9 @@ def run_simulation(trial_len=1000, sim_len=1000, target=0.0, prism=0.0, n=1):
             }
         )
 
+    for i, neuron in enumerate(cortex):
+        nest.SetStatus([neuron], {"fiber_id": i})
+
     spikedetector = nest.Create("spike_detector")
     nest.Connect(cortex, spikedetector)
 

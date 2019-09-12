@@ -54,6 +54,8 @@ extern const Name target;
 extern const Name prism_deviation;
 extern const Name baseline_rate;
 extern const Name gain_rate;
+extern const Name joint_id;
+extern const Name fiber_id;
 }
 }
 
