@@ -30,6 +30,7 @@
 #include "radial_basis_function_input.h"
 #include "closed_loop_neuron.h"
 #include "planner_neuron.h"
+#include "cortex_neuron.h"
 #include "stdp_connection_sinexp.h"
 #include "stdp_connection_cosexp.h"
 #include "iSTDP.h"
@@ -124,6 +125,9 @@ mynest::AlbertoModule::init( SLIInterpreter* i )
 
   nest::kernel().model_manager.register_node_model< mynest::planner_neuron >(
     "planner_neuron" );
+
+  nest::kernel().model_manager.register_node_model< mynest::cortex_neuron >(
+    "cortex_neuron" );
 
   nest::kernel().model_manager.register_node_model< mynest::radial_basis_function_input >(
     "radial_basis_function_input" );
