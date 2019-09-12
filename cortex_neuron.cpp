@@ -32,6 +32,8 @@ mynest::cortex_neuron::Parameters_::Parameters_()
   : trial_length_( 1000 )
   , joint_id_( 0 )
   , fiber_id_( 0 )
+  , fibers_per_joint_( 100 )
+  , rbf_sdev_( 10.0 )
   , baseline_rate_( 10.0 )
   , gain_rate_( 10.0 )
 {
@@ -47,6 +49,8 @@ mynest::cortex_neuron::Parameters_::get( DictionaryDatum& d ) const
   def< long >( d, mynames::trial_length, trial_length_ );
   def< long >( d, mynames::joint_id, joint_id_ );
   def< long >( d, mynames::fiber_id, fiber_id_ );
+  def< long >( d, mynames::fibers_per_joint, fibers_per_joint_ );
+  def< double >( d, mynames::rbf_sdev, rbf_sdev_ );
   def< double >( d, mynames::baseline_rate, baseline_rate_ );
   def< double >( d, mynames::gain_rate, gain_rate_ );
 }
@@ -61,6 +65,8 @@ mynest::cortex_neuron::Parameters_::set( const DictionaryDatum& d )
   }
   updateValue< long >( d, mynames::joint_id, joint_id_ );
   updateValue< long >( d, mynames::fiber_id, fiber_id_ );
+  updateValue< long >( d, mynames::fibers_per_joint, fibers_per_joint_ );
+  updateValue< double >( d, mynames::rbf_sdev, rbf_sdev_ );
   updateValue< double >( d, mynames::baseline_rate, baseline_rate_ );
   updateValue< double >( d, mynames::gain_rate, gain_rate_ );
 }
@@ -116,9 +122,9 @@ mynest::cortex_neuron::calibrate()
   for (long lag = from; lag < to; ++lag )
   {
     double t = ( from + lag ) * time_res * 1e-3;  // [s]
-    double sdev = 10;
+    double sdev = P_.rbf_sdev_;
     double mean = P_.fiber_id_;
-    double desired = 100 * ( 0.5 + 0.5*std::sin( 2*M_PI * t ) );
+    double desired = P_.fibers_per_joint_ * ( 0.5 + 0.5*std::sin( 2*M_PI * t ) );
     double rate = P_.baseline_rate_ * exp(-pow(((desired - mean) / sdev), 2 ));
 
     V_.poisson_dev_.set_lambda( time_res * rate * 1e-3 );

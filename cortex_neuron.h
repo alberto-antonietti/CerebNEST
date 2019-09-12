@@ -52,6 +52,8 @@ private:
     long trial_length_;
     long joint_id_;
     long fiber_id_;
+    long fibers_per_joint_;
+    double rbf_sdev_;
     double baseline_rate_;
     double gain_rate_;
 

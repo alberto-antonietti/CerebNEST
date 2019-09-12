@@ -26,11 +26,14 @@ def run_simulation(trial_len=1000, sim_len=1000, target=0.0, prism=0.0, n=1):
         n=n,
         params={
             "trial_length": trial_len,
+            "fibers_per_joint": n//4,
+            "rbf_sdev": 20.0
             }
         )
 
     for i, neuron in enumerate(cortex):
-        nest.SetStatus([neuron], {"fiber_id": i})
+        nest.SetStatus([neuron], {"joint_id": i // (n//4),
+                                  "fiber_id": i % (n//4)})
 
     spikedetector = nest.Create("spike_detector")
     nest.Connect(cortex, spikedetector)
@@ -44,7 +47,7 @@ def run_simulation(trial_len=1000, sim_len=1000, target=0.0, prism=0.0, n=1):
     return evs, ts
 
 
-evs, ts = run_simulation(n=100)
+evs, ts = run_simulation(n=400)
 
 pylab.scatter(ts, evs, marker='.')
 pylab.show()
