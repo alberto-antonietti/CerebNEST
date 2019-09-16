@@ -35,6 +35,12 @@ def run_simulation(trial_len=1000, sim_len=1000, target=0.0, prism=0.0, n=1):
         nest.SetStatus([neuron], {"joint_id": i // (n//4),
                                   "fiber_id": i % (n//4)})
 
+    # parrot = nest.Create("parrot_neuron", n)
+    # poisson = nest.Create('spike_generator')
+    # nest.Connect(planner, cortex, "one_to_one")
+    # nest.Connect(poisson, parrot, 'all_to_all')
+    nest.Connect(planner, cortex, 'one_to_one')
+
     spikedetector = nest.Create("spike_detector")
     nest.Connect(cortex, spikedetector)
 
