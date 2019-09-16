@@ -43,8 +43,7 @@ private:
 
   struct Buffers_
   {
-    std::vector<int> spike_mult;
-    std::vector<long> spike_lag;
+    std::map<long, int> spikes_;
   };
 
   struct Parameters_

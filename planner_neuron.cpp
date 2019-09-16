@@ -100,8 +100,6 @@ mynest::planner_neuron::init_state_( const Node& proto )
 void
 mynest::planner_neuron::init_buffers_()
 {
-  B_.spike_mult.clear();
-  B_.spike_lag.clear();
   Archiving_Node::clear_history();
 }
 
@@ -109,24 +107,23 @@ void
 mynest::planner_neuron::calibrate()
 {
   double rate = P_.baseline_rate_ + P_.gain_rate_ * (P_.target_ + P_.prism_deviation_);
-  V_.rate_ = std::max(0.0, rate);
+  rate =  std::max(0.0, rate);
+  V_.rate_ = rate;
 
   double time_res = nest::Time::get_resolution().get_ms();  // 0.1
-  long from = 0;
-  long to = (double)P_.trial_length_ / time_res;
+  long ticks = (double)P_.trial_length_ / time_res;
 
   librandom::RngPtr rng = nest::kernel().rng_manager.get_rng( get_thread() );
 
-  V_.poisson_dev_.set_lambda( time_res * V_.rate_ * 1e-3 );
+  V_.poisson_dev_.set_lambda( time_res * rate * 1e-3 );
 
-  for (long lag = from; lag < to; ++lag )
+  for (long t = 0; t < ticks; t++ )
   {
     long n_spikes = V_.poisson_dev_.ldev( rng );
 
     if ( n_spikes > 0 ) // we must not send events with multiplicity 0
     {
-      B_.spike_mult.push_back( n_spikes );
-      B_.spike_lag.push_back( lag );
+      B_.spikes_[t] = n_spikes;
     }
   }
 }
@@ -139,21 +136,21 @@ mynest::planner_neuron::update( nest::Time const& origin, const long from, const
   assert( static_cast<nest::delay>(from) < nest::kernel().connection_manager.get_min_delay() );
   assert( from < to );
 
-  double time_res = nest::Time::get_resolution().get_ms();  // 0.1
-  long trial_len_ticks = (double)P_.trial_length_ / time_res;
-
-  long const T = origin.get_steps() + from;
-
-  if ( T % trial_len_ticks == 0 )
+  for ( long lag = from; lag < to; ++lag )
   {
-    for ( size_t i = 0; i < B_.spike_lag.size(); i++ )
+    long t = origin.get_steps() + lag;
+    int n_spikes = B_.spikes_[t];
+    if ( n_spikes > 0 )
     {
       nest::SpikeEvent se;
-      int n_spikes = B_.spike_mult[i];
-      long lag = B_.spike_lag[i];  // it works fine without adding any offset
-
       se.set_multiplicity( n_spikes );
       nest::kernel().event_delivery_manager.send( *this, se, lag );
+
+      // set the spike times, respecting the multiplicity
+      for ( unsigned long i = 0; i < n_spikes; i++ )
+      {
+        set_spiketime( nest::Time::step( t ) );
+      }
     }
   }
 }
