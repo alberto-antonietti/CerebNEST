@@ -44,6 +44,7 @@ private:
   struct Buffers_
   {
     std::map<long, int> out_spikes_;
+    std::vector<int> in_spikes_;
   };
 
   struct Parameters_
@@ -64,7 +65,7 @@ private:
 
   struct Variables_
   {
-    double rate_; //!< process rate in Hz
+    double in_rate_;
     librandom::PoissonRandomDev poisson_dev_; //!< Random deviate generator
   };
 
