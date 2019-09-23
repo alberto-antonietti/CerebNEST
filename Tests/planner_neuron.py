@@ -67,7 +67,10 @@ def test_periodicity(trial_len=1000, sim_len=3000):
         if t < trial_len
     ]
     assert(len(ts) > len(first_trial_ts))
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
     assert(all(
         round(t % trial_len, 1) in first_trial_ts
         for t in ts
