@@ -53,7 +53,7 @@ def run_simulation(trial_len=1000, sim_len=1000, target=0.0, prism=0.0, n=1):
     return evs, ts
 
 
-evs, ts = run_simulation(n=400)
+evs, ts = run_simulation(1000, 2000, n=400)
 
 pylab.scatter(ts, evs, marker='.')
 pylab.show()

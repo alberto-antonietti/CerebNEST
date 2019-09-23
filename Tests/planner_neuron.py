@@ -66,6 +66,8 @@ def test_periodicity(trial_len=1000, sim_len=3000):
         round(t, 1) for t in ts
         if t < trial_len
     ]
+    assert(len(ts) > len(first_trial_ts))
+
     assert(all(
         round(t % trial_len, 1) in first_trial_ts
         for t in ts
@@ -94,7 +96,7 @@ def test_recurrency():
 
 test_periodicity(1000, 3000)
 test_periodicity(500, 1000)
-test_periodicity(100, 500)
+test_periodicity(200, 600)
 test_poisson()
 test_rate()
 

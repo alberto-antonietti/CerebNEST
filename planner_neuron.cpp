@@ -136,10 +136,14 @@ mynest::planner_neuron::update( nest::Time const& origin, const long from, const
   assert( static_cast<nest::delay>(from) < nest::kernel().connection_manager.get_min_delay() );
   assert( from < to );
 
+  double time_res = nest::Time::get_resolution().get_ms();  // 0.1
+  long trial_ticks = (double)P_.trial_length_ / time_res;
+
   for ( long lag = from; lag < to; ++lag )
   {
     long t = origin.get_steps() + lag;
-    int n_spikes = B_.spikes_[t];
+    int n_spikes = B_.spikes_[t % trial_ticks];
+
     if ( n_spikes > 0 )
     {
       nest::SpikeEvent se;
@@ -147,7 +151,7 @@ mynest::planner_neuron::update( nest::Time const& origin, const long from, const
       nest::kernel().event_delivery_manager.send( *this, se, lag );
 
       // set the spike times, respecting the multiplicity
-      for ( unsigned long i = 0; i < n_spikes; i++ )
+      for ( int i = 0; i < n_spikes; i++ )
       {
         set_spiketime( nest::Time::step( t ) );
       }
