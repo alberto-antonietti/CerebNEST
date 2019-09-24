@@ -55,6 +55,46 @@ def run_simulation(trial_len=1000, sim_len=1000, target=0.0, prism=0.0, n=1):
     return evs, ts
 
 
+def poisson_input(trial_len=1000, sim_len=1000, n=400):
+    nest.ResetKernel()
+
+    cortex = nest.Create(
+        "cortex_neuron",
+        n=n,
+        params={
+            "trial_length": trial_len,
+            "fibers_per_joint": n//4,
+            "rbf_sdev": 20.0
+            }
+        )
+
+    for i, neuron in enumerate(cortex):
+        nest.SetStatus([neuron], {"joint_id": i // (n//4),
+                                  "fiber_id": i % (n//4)})
+
+    nest.SetStatus(cortex[:1], {"to_file": True})
+
+    poisson = nest.Create(
+        'poisson_generator',
+        n=n,
+        params={"rate": 10.0}
+    )
+    nest.Connect(poisson, cortex, 'one_to_one')
+
+    spikedetector = nest.Create("spike_detector")
+    nest.Connect(cortex, spikedetector)
+
+    nest.Simulate(sim_len)
+
+    dSD = nest.GetStatus(spikedetector, keys="events")[0]
+    evs = dSD["senders"]
+    ts = dSD["times"]
+
+    return evs, ts
+
+
+# poisson_input()
+
 evs, ts = run_simulation(1000, 2000, n=400)
 
 pylab.scatter(ts, evs, marker='.')
