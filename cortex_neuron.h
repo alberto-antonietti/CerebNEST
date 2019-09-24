@@ -56,6 +56,7 @@ private:
     double rbf_sdev_;
     double baseline_rate_;
     double gain_rate_;
+    bool to_file_;
 
     Parameters_(); //!< Sets default parameter values
 
@@ -67,6 +68,7 @@ private:
   {
     double in_rate_;
     librandom::PoissonRandomDev poisson_dev_; //!< Random deviate generator
+    std::ofstream out_file_; //!< OutputFile
   };
 
   Buffers_ B_;

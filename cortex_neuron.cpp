@@ -36,6 +36,7 @@ mynest::cortex_neuron::Parameters_::Parameters_()
   , rbf_sdev_( 10.0 )
   , baseline_rate_( 10.0 )
   , gain_rate_( 10.0 )
+  , to_file_( false )
 {
 }
 
@@ -53,6 +54,7 @@ mynest::cortex_neuron::Parameters_::get( DictionaryDatum& d ) const
   def< double >( d, mynames::rbf_sdev, rbf_sdev_ );
   def< double >( d, mynames::baseline_rate, baseline_rate_ );
   def< double >( d, mynames::gain_rate, gain_rate_ );
+  def< bool >( d, nest::names::to_file, to_file_ );
 }
 
 void
@@ -69,6 +71,7 @@ mynest::cortex_neuron::Parameters_::set( const DictionaryDatum& d )
   updateValue< double >( d, mynames::rbf_sdev, rbf_sdev_ );
   updateValue< double >( d, mynames::baseline_rate, baseline_rate_ );
   updateValue< double >( d, mynames::gain_rate, gain_rate_ );
+  updateValue< bool >( d, nest::names::to_file, to_file_ );
 }
 
 /* ----------------------------------------------------------------
@@ -140,6 +143,11 @@ mynest::cortex_neuron::calibrate()
       B_.out_spikes_[tick] = n_spikes;
     }
   }
+
+  if ( P_.to_file_ )
+  {
+    V_.out_file_.open( "cortex_out.dat" );
+  }
 }
 
 
@@ -193,5 +201,10 @@ mynest::cortex_neuron::handle( nest::SpikeEvent& e )
   double time_res = nest::Time::get_resolution().get_ms();  // 0.1
   V_.in_rate_ = 1000.0 * spike_count / (buf_size * time_res);
 
+  if ( P_.to_file_ )
+  {
+    V_.out_file_ << "in_rate\t" << V_.in_rate_ << std::endl;
+    std::cout << "in_rate\t" << V_.in_rate_ << std::endl;
+  }
   // std::cout << "Rate: " << V_.in_rate_ << std::endl;
 }
