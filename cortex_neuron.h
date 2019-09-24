@@ -44,7 +44,7 @@ private:
   struct Buffers_
   {
     std::map<long, int> out_spikes_;
-    std::vector<int> in_spikes_;
+    std::vector<double> in_spikes_;
   };
 
   struct Parameters_

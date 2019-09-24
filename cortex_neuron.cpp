@@ -111,7 +111,8 @@ mynest::cortex_neuron::init_buffers_()
   Archiving_Node::clear_history();
 
   double time_res = nest::Time::get_resolution().get_ms();  // 0.1
-  long ticks = 50.0 / time_res;  // 50ms
+  // long ticks = 50.0 / time_res;  // 50ms
+  long ticks = 100.0 / time_res;  // 100ms
   for ( long i = 0; i < ticks; i++ )
   {
     B_.in_spikes_.push_back(0);
@@ -191,7 +192,8 @@ mynest::cortex_neuron::handle( nest::SpikeEvent& e )
   long t = stamp.get_steps();
 
   long buf_size = B_.in_spikes_.size();
-  B_.in_spikes_[ t % buf_size ] = e.get_multiplicity();
+
+  B_.in_spikes_[ t % buf_size ] += e.get_weight() * e.get_multiplicity();
 
   int spike_count = 0;
   for ( long i = 0; i < buf_size; i++ )
@@ -199,7 +201,7 @@ mynest::cortex_neuron::handle( nest::SpikeEvent& e )
     spike_count += B_.in_spikes_[ i ];
   }
   double time_res = nest::Time::get_resolution().get_ms();  // 0.1
-  V_.in_rate_ = 1000.0 * spike_count / (buf_size * time_res);
+  V_.in_rate_ = std::max( 0.0, 1000.0 * spike_count / (buf_size * time_res) );
 
   if ( P_.to_file_ )
   {
