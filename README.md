@@ -1,6 +1,10 @@
 # CerebNEST
 
-Tested with Ubuntu 14.04 64bit, Python 2.7.6 and NEST Release 2.14.0
+Tested with:
+
+*branch master*: Ubuntu 18.04 and Red Hat Enterprise Linux Server 7.7 (Maipo), Python 3.7.3 and NEST Release 2.18.0
+
+*branch v14*: Ubuntu 14.04 64bit, Python 2.7.6 and NEST Release 2.14.0
 
 ### Installation instructions
 
