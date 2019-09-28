@@ -6,7 +6,11 @@ import pylab
 nest.Install("albertomodule")
 
 
-def run_simulation(trial_len=1000, sim_len=1000, target=0.0, prism=0.0, n=1):
+nest.SetKernelStatus({'resolution': 1.0})
+
+
+# 300ms to comply with JointTorques_ideal.dat
+def run_simulation(trial_len=300, sim_len=900, target=0.0, prism=0.0, n=1):
     nest.ResetKernel()
 
     planner = nest.Create(
@@ -109,6 +113,6 @@ def poisson_input(trial_len=1000, sim_len=1000, n=400):
     return evs, ts
 
 
-run_simulation(1000, 2000, n=400)
+run_simulation(n=400)
 
 poisson_input()

@@ -117,12 +117,41 @@ mynest::cortex_neuron::init_buffers_()
   {
     B_.in_spikes_.push_back(0);
   }
+
+  B_.traj_.resize(4, std::vector<double>(300));
+  std::ifstream traj_file("JointTorques_ideal.dat");
+
+  for (int i = 0; i < 300; i++)
+  {
+    traj_file >> B_.traj_[0][i]
+              >> B_.traj_[1][i]
+              >> B_.traj_[2][i]
+              >> B_.traj_[3][i];
+  }
+  // Normalize
+  double max_ = 0.0;
+  for (int i = 0; i < 300; i++)
+  for (int j = 0; j < 4; j++)
+  {
+    double val = std::abs(B_.traj_[j][i]);
+    if ( val > max_ ) max_ = val;
+  }
+  for (int i = 0; i < 300; i++)
+  for (int j = 0; j < 4; j++)
+  {
+    // B_.traj_[j][i] /= max_;
+    B_.traj_[j][i] = 0.5 + 0.5*B_.traj_[j][i] / max_;
+  }
+  // std::cout << B_.traj_[0][1] << " "
+  //           << B_.traj_[1][1] << " "
+  //           << B_.traj_[2][1] << " "
+  //           << B_.traj_[3][1] << std::endl;
 }
 
 void
 mynest::cortex_neuron::calibrate()
 {
-  double time_res = nest::Time::get_resolution().get_ms();  // 0.1
+  double time_res = nest::Time::get_resolution().get_ms();
   long ticks = (double)P_.trial_length_ / time_res;
 
   librandom::RngPtr rng = nest::kernel().rng_manager.get_rng( get_thread() );
@@ -132,7 +161,8 @@ mynest::cortex_neuron::calibrate()
     double t = tick * time_res * 1e-3;  // [s]
     double sdev = P_.rbf_sdev_;
     double mean = P_.fiber_id_;
-    double desired = P_.fibers_per_joint_ * ( 0.5 + 0.5*std::sin( 2*M_PI * t ) );
+    // double desired = P_.fibers_per_joint_ * ( 0.5 + 0.5*std::sin( 2*M_PI * t ) );
+    double desired = P_.fibers_per_joint_ * B_.traj_[P_.joint_id_][(int)(tick * time_res) % 300];
     double rate = P_.baseline_rate_ * exp(-pow(((desired - mean) / sdev), 2 ));
 
     V_.poisson_dev_.set_lambda( time_res * rate * 1e-3 );
@@ -206,7 +236,7 @@ mynest::cortex_neuron::handle( nest::SpikeEvent& e )
   if ( P_.to_file_ )
   {
     V_.out_file_ << "in_rate\t" << V_.in_rate_ << std::endl;
-    std::cout << "in_rate\t" << V_.in_rate_ << std::endl;
+    // std::cout << "in_rate\t" << V_.in_rate_ << std::endl;
   }
   // std::cout << "Rate: " << V_.in_rate_ << std::endl;
 }

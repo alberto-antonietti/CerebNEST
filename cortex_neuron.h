@@ -45,6 +45,7 @@ private:
   {
     std::map<long, int> out_spikes_;
     std::vector<double> in_spikes_;
+    std::vector <std::vector<double> > traj_;
   };
 
   struct Parameters_
