@@ -2,16 +2,18 @@ from __future__ import print_function
 import nest
 import numpy as np
 import pylab
+import trajectories
 
 nest.Install("albertomodule")
 
 
-nest.SetKernelStatus({'resolution': 1.0})
+# nest.SetKernelStatus({'resolution': 1.0})
 
 
 # 300ms to comply with JointTorques_ideal.dat
 def run_simulation(trial_len=300, sim_len=900, target=0.0, prism=0.0, n=1):
     nest.ResetKernel()
+    trajectories.save_file(prism, trial_len)
 
     planner = nest.Create(
         "planner_neuron",
@@ -59,8 +61,9 @@ def run_simulation(trial_len=300, sim_len=900, target=0.0, prism=0.0, n=1):
     return evs, ts
 
 
-def poisson_input(trial_len=1000, sim_len=1000, n=400):
+def poisson_input(trial_len=500, sim_len=1000, n=400):
     nest.ResetKernel()
+    trajectories.save_file(0.0, trial_len)
 
     cortex = nest.Create(
         "cortex_neuron",

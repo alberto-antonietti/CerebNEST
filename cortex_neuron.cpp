@@ -118,10 +118,10 @@ mynest::cortex_neuron::init_buffers_()
     B_.in_spikes_.push_back(0);
   }
 
-  B_.traj_.resize(4, std::vector<double>(300));
-  std::ifstream traj_file("JointTorques_ideal.dat");
+  B_.traj_.resize(4, std::vector<double>(P_.trial_length_));
+  std::ifstream traj_file("JointTorques.dat");
 
-  for (int i = 0; i < 300; i++)
+  for (int i = 0; i < P_.trial_length_; i++)
   {
     traj_file >> B_.traj_[0][i]
               >> B_.traj_[1][i]
@@ -130,13 +130,13 @@ mynest::cortex_neuron::init_buffers_()
   }
   // Normalize
   double max_ = 0.0;
-  for (int i = 0; i < 300; i++)
+  for (int i = 0; i < P_.trial_length_; i++)
   for (int j = 0; j < 4; j++)
   {
     double val = std::abs(B_.traj_[j][i]);
     if ( val > max_ ) max_ = val;
   }
-  for (int i = 0; i < 300; i++)
+  for (int i = 0; i < P_.trial_length_; i++)
   for (int j = 0; j < 4; j++)
   {
     // B_.traj_[j][i] /= max_;
@@ -162,7 +162,7 @@ mynest::cortex_neuron::calibrate()
     double sdev = P_.rbf_sdev_;
     double mean = P_.fiber_id_;
     // double desired = P_.fibers_per_joint_ * ( 0.5 + 0.5*std::sin( 2*M_PI * t ) );
-    double desired = P_.fibers_per_joint_ * B_.traj_[P_.joint_id_][(int)(tick * time_res) % 300];
+    double desired = P_.fibers_per_joint_ * B_.traj_[P_.joint_id_][(int)(tick * time_res) % P_.trial_length_];
     double rate = P_.baseline_rate_ * exp(-pow(((desired - mean) / sdev), 2 ));
 
     V_.poisson_dev_.set_lambda( time_res * rate * 1e-3 );
