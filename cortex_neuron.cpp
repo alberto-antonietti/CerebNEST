@@ -151,30 +151,6 @@ mynest::cortex_neuron::init_buffers_()
 void
 mynest::cortex_neuron::calibrate()
 {
-  double time_res = nest::Time::get_resolution().get_ms();
-  long ticks = (double)P_.trial_length_ / time_res;
-
-  librandom::RngPtr rng = nest::kernel().rng_manager.get_rng( get_thread() );
-
-  for (long tick = 0; tick < ticks; tick++ )
-  {
-    double t = tick * time_res * 1e-3;  // [s]
-    double sdev = P_.rbf_sdev_;
-    double mean = P_.fiber_id_;
-    // double desired = P_.fibers_per_joint_ * ( 0.5 + 0.5*std::sin( 2*M_PI * t ) );
-    double desired = P_.fibers_per_joint_ * B_.traj_[P_.joint_id_][(int)(tick * time_res) % P_.trial_length_];
-    double rate = P_.baseline_rate_ * exp(-pow(((desired - mean) / sdev), 2 ));
-
-    V_.poisson_dev_.set_lambda( time_res * rate * 1e-3 );
-
-    long n_spikes = V_.poisson_dev_.ldev( rng );
-
-    if ( n_spikes > 0 ) // we must not send events with multiplicity 0
-    {
-      B_.out_spikes_[tick] = n_spikes;
-    }
-  }
-
   if ( P_.to_file_ )
   {
     V_.out_file_.open( "cortex_out.dat" );
@@ -191,11 +167,33 @@ mynest::cortex_neuron::update( nest::Time const& origin, const long from, const 
 
   double time_res = nest::Time::get_resolution().get_ms();  // 0.1
   long trial_ticks = (double)P_.trial_length_ / time_res;
+  librandom::RngPtr rng = nest::kernel().rng_manager.get_rng( get_thread() );
 
   for ( long lag = from; lag < to; ++lag )
   {
-    long t = origin.get_steps() + lag;
-    int n_spikes = B_.out_spikes_[t % trial_ticks];
+    long tick = origin.get_steps() + lag;
+    // int n_spikes = B_.out_spikes_[tick % trial_ticks];
+    double t = tick * time_res * 1e-3;  // [s]
+    double sdev = P_.rbf_sdev_;
+    double mean = P_.fiber_id_;
+    // double desired = P_.fibers_per_joint_ * ( 0.5 + 0.5*std::sin( 2*M_PI * t ) );
+    double desired = P_.fibers_per_joint_ * B_.traj_[P_.joint_id_][(int)(tick * time_res) % P_.trial_length_];
+
+    double baseline_rate;
+    if ( P_.joint_id_ == 1 )  // Second joint
+    {
+      baseline_rate = V_.in_rate_;
+    }
+    else
+    {
+      baseline_rate = P_.baseline_rate_;
+    }
+
+    double rate = baseline_rate * exp(-pow(((desired - mean) / sdev), 2 ));
+
+    V_.poisson_dev_.set_lambda( time_res * rate * 1e-3 );
+
+    long n_spikes = V_.poisson_dev_.ldev( rng );
 
     if ( n_spikes > 0 )
     {
@@ -206,12 +204,12 @@ mynest::cortex_neuron::update( nest::Time const& origin, const long from, const 
       // set the spike times, respecting the multiplicity
       for ( unsigned long i = 0; i < n_spikes; i++ )
       {
-        set_spiketime( nest::Time::step( t ) );
+        set_spiketime( nest::Time::step( tick ) );
       }
     }
 
     long buf_size = B_.in_spikes_.size();
-    B_.in_spikes_[ t % buf_size ] = 0;
+    B_.in_spikes_[ tick % buf_size ] = 0;
   }
 }
 
