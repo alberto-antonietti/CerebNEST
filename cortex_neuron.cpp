@@ -182,7 +182,7 @@ mynest::cortex_neuron::update( nest::Time const& origin, const long from, const 
     double baseline_rate;
     if ( P_.joint_id_ == 1 )  // Second joint
     {
-      baseline_rate = V_.in_rate_;
+      baseline_rate = std::max( 0.0, V_.in_rate_ );
     }
     else
     {

@@ -99,4 +99,5 @@ def save_file(prism=0.25, duration=300, file_name="JointTorques.dat"):
     np.savetxt(file_name, qdd_p)
 
 
-# plot_traj()
+if __name__ == '__main__':
+    plot_traj()

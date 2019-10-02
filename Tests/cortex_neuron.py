@@ -11,7 +11,7 @@ nest.Install("albertomodule")
 
 
 # 300ms to comply with JointTorques_ideal.dat
-def run_simulation(trial_len=300, sim_len=900, target=0.0, prism=0.0, n=1):
+def run_simulation(trial_len=500, sim_len=1000, target=0.0, prism=0.0, n=1):
     nest.ResetKernel()
     trajectories.save_file(prism, trial_len)
 
@@ -110,12 +110,13 @@ def poisson_input(trial_len=500, sim_len=1000, n=400):
     evs = dSD["senders"]
     ts = dSD["times"]
 
-    pylab.scatter(ts, evs, marker='.')
-    pylab.show()
-
     return evs, ts
 
 
-run_simulation(n=400)
+evs, ts = run_simulation(n=400)
+
+pylab.scatter(ts, evs, marker='.')
+pylab.show()
+
 
 poisson_input()
