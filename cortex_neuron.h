@@ -67,6 +67,7 @@ private:
   struct Variables_
   {
     double in_rate_;
+    std::vector<double> joint_scale_factors_;
     librandom::PoissonRandomDev poisson_dev_; //!< Random deviate generator
     std::ofstream out_file_; //!< OutputFile
   };

@@ -33,7 +33,7 @@ mynest::cortex_neuron::Parameters_::Parameters_()
   , joint_id_( 0 )
   , fiber_id_( 0 )
   , fibers_per_joint_( 100 )
-  , rbf_sdev_( 10.0 )
+  , rbf_sdev_( 5.0 )
   , baseline_rate_( 10.0 )
   , gain_rate_( 10.0 )
   , to_file_( false )
@@ -121,6 +121,12 @@ mynest::cortex_neuron::init_buffers_()
   B_.traj_.resize(4, std::vector<double>(P_.trial_length_));
   std::ifstream traj_file("JointTorques.dat");
 
+  V_.joint_scale_factors_.resize(4);
+  traj_file >> V_.joint_scale_factors_[0]
+            >> V_.joint_scale_factors_[1]
+            >> V_.joint_scale_factors_[2]
+            >> V_.joint_scale_factors_[3];
+
   for (int i = 0; i < P_.trial_length_; i++)
   {
     traj_file >> B_.traj_[0][i]
@@ -128,6 +134,14 @@ mynest::cortex_neuron::init_buffers_()
               >> B_.traj_[2][i]
               >> B_.traj_[3][i];
   }
+
+  for (int i = 0; i < P_.trial_length_; i++)
+  for (int j = 0; j < 4; j++)
+  {
+    B_.traj_[j][i] = 0.5 + 0.5 * B_.traj_[j][i] * V_.joint_scale_factors_[j];
+  }
+
+  /*
   // Normalize
   double max_ = 0.0;
   for (int i = 0; i < P_.trial_length_; i++)
@@ -136,16 +150,14 @@ mynest::cortex_neuron::init_buffers_()
     double val = std::abs(B_.traj_[j][i]);
     if ( val > max_ ) max_ = val;
   }
+  std::cout << "Max: " << max_ << std::endl;
+
   for (int i = 0; i < P_.trial_length_; i++)
   for (int j = 0; j < 4; j++)
   {
-    // B_.traj_[j][i] /= max_;
-    B_.traj_[j][i] = 0.5 + 0.5*B_.traj_[j][i] / max_;
+    B_.traj_[j][i] = 0.5 + 0.5*B_.traj_[j][i] * V_.joint_scale_factors_[j] / max_;
   }
-  // std::cout << B_.traj_[0][1] << " "
-  //           << B_.traj_[1][1] << " "
-  //           << B_.traj_[2][1] << " "
-  //           << B_.traj_[3][1] << std::endl;
+  */
 }
 
 void

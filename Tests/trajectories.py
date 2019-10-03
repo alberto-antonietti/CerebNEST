@@ -90,14 +90,52 @@ def plot_traj(prism=25.0, duration=300):
     plt.show()
 
 
+def normalize(qdd):
+    # Torques
+    trs = [qdd[:, i] for i in range(4)]
+    amplitudes = np.array([max(abs(tr)) for tr in trs])
+
+    # print(amplitudes)
+
+    for i in range(4):
+        qdd[:, i] /= amplitudes[i]
+
+    amplitudes_norm = amplitudes / max(amplitudes)
+    return qdd, amplitudes_norm
+
+
 def save_file(prism=0.25, duration=300, file_name="JointTorques.dat"):
     q_in = np.array((10.0, -10.0, -90.0, 170.0))
-    q_prism = np.array((0.0, prism, 0.0,   0.0))
+    q_out = np.array((0.0, prism, 0.0,   0.0))
 
-    q_p, qd_p, qdd_p = jtraj(q_in, q_prism, duration)
+    q, qd, qdd = jtraj(q_in, q_out, duration)
 
-    np.savetxt(file_name, qdd_p)
+    qdd_n, amps = normalize(qdd)
+
+    np.savetxt(file_name, np.vstack([amps, qdd_n]))
+
+    # fig, axs = plt.subplots(4)
+
+    # for i in range(4):
+    #     axs[i].plot(qdd[:, i])
+
+    # plt.show()
 
 
 if __name__ == '__main__':
-    plot_traj()
+    prism = 0.25
+    duration = 300
+    q_in = np.array((10.0, -10.0, -90.0, 170.0))
+    q_out = np.array((0.0, prism, 0.0,   0.0))
+
+    q, qd, qdd = jtraj(q_in, q_out, duration)
+
+    qdd_n, amps = normalize(qdd)
+    # print(np.vstack([amps, qdd_n]))
+
+    fig, axs = plt.subplots(4)
+
+    for i in range(4):
+        axs[i].plot(qdd[:, i])
+
+    plt.show()
