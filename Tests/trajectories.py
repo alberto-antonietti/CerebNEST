@@ -101,6 +101,7 @@ def normalize(qdd):
         qdd[:, i] /= amplitudes[i]
 
     amplitudes_norm = amplitudes / max(amplitudes)
+    # print(amplitudes_norm)
     return qdd, amplitudes_norm
 
 

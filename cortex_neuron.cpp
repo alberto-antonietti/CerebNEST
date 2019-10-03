@@ -33,7 +33,7 @@ mynest::cortex_neuron::Parameters_::Parameters_()
   , joint_id_( 0 )
   , fiber_id_( 0 )
   , fibers_per_joint_( 100 )
-  , rbf_sdev_( 5.0 )
+  , rbf_sdev_( 10.0 )
   , baseline_rate_( 10.0 )
   , gain_rate_( 10.0 )
   , to_file_( false )
@@ -138,26 +138,8 @@ mynest::cortex_neuron::init_buffers_()
   for (int i = 0; i < P_.trial_length_; i++)
   for (int j = 0; j < 4; j++)
   {
-    B_.traj_[j][i] = 0.5 + 0.5 * B_.traj_[j][i] * V_.joint_scale_factors_[j];
+    B_.traj_[j][i] = 0.5 + 0.5 * B_.traj_[j][i];
   }
-
-  /*
-  // Normalize
-  double max_ = 0.0;
-  for (int i = 0; i < P_.trial_length_; i++)
-  for (int j = 0; j < 4; j++)
-  {
-    double val = std::abs(B_.traj_[j][i]);
-    if ( val > max_ ) max_ = val;
-  }
-  std::cout << "Max: " << max_ << std::endl;
-
-  for (int i = 0; i < P_.trial_length_; i++)
-  for (int j = 0; j < 4; j++)
-  {
-    B_.traj_[j][i] = 0.5 + 0.5*B_.traj_[j][i] * V_.joint_scale_factors_[j] / max_;
-  }
-  */
 }
 
 void
@@ -192,13 +174,14 @@ mynest::cortex_neuron::update( nest::Time const& origin, const long from, const 
     double desired = P_.fibers_per_joint_ * B_.traj_[P_.joint_id_][(int)(tick * time_res) % P_.trial_length_];
 
     double baseline_rate;
-    if ( P_.joint_id_ == 1 )  // Second joint
+    int j_id = P_.joint_id_;
+    if ( j_id == 1 )  // Second joint
     {
-      baseline_rate = std::max( 0.0, V_.in_rate_ );
+      baseline_rate = std::max( 0.0, V_.in_rate_ ) * V_.joint_scale_factors_[j_id];
     }
     else
     {
-      baseline_rate = P_.baseline_rate_;
+      baseline_rate = P_.baseline_rate_ * V_.joint_scale_factors_[j_id];
     }
 
     double rate = baseline_rate * exp(-pow(((desired - mean) / sdev), 2 ));
@@ -246,7 +229,6 @@ mynest::cortex_neuron::handle( nest::SpikeEvent& e )
   if ( P_.to_file_ )
   {
     V_.out_file_ << "in_rate\t" << V_.in_rate_ << std::endl;
-    // std::cout << "in_rate\t" << V_.in_rate_ << std::endl;
   }
   // std::cout << "Rate: " << V_.in_rate_ << std::endl;
 }
