@@ -124,6 +124,8 @@ def save_file(prism=0.25, duration=300, file_name="JointTorques.dat"):
 
 
 if __name__ == '__main__':
+    plot_traj()
+
     prism = 0.25
     duration = 300
     q_in = np.array((10.0, -10.0, -90.0, 170.0))
