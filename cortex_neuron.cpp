@@ -111,8 +111,8 @@ mynest::cortex_neuron::init_buffers_()
   Archiving_Node::clear_history();
 
   double time_res = nest::Time::get_resolution().get_ms();  // 0.1
-  // long ticks = 50.0 / time_res;  // 50ms
-  long ticks = 100.0 / time_res;  // 100ms
+  long ticks = 50.0 / time_res;  // 50ms
+  // long ticks = 100.0 / time_res;  // 100ms
   for ( long i = 0; i < ticks; i++ )
   {
     B_.in_spikes_.push_back(0);
@@ -175,13 +175,12 @@ mynest::cortex_neuron::update( nest::Time const& origin, const long from, const 
 
     double baseline_rate;
     int j_id = P_.joint_id_;
+
+    baseline_rate = P_.baseline_rate_;
+
     if ( j_id == 1 )  // Second joint
     {
-      baseline_rate = std::max( 0.0, V_.in_rate_ ) * V_.joint_scale_factors_[j_id];
-    }
-    else
-    {
-      baseline_rate = P_.baseline_rate_ * V_.joint_scale_factors_[j_id];
+      baseline_rate = std::max( 0.0, V_.in_rate_ );
     }
 
     double rate = baseline_rate * exp(-pow(((desired - mean) / sdev), 2 ));

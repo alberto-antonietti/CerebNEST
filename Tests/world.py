@@ -1,6 +1,5 @@
 import numpy as np
 import nest
-import pylab
 from itertools import accumulate
 import matplotlib.pyplot as plt
 
@@ -20,7 +19,7 @@ def run_simulation(trial_len=300, sim_len=300, target=0.0, prism=0.0, n=1):
             "trial_length": trial_len,
             "target": target,
             "prism_deviation": prism,
-            "baseline_rate": 50.0,
+            "baseline_rate": 10.0,
             "gain_rate": 10.0,
             }
         )
@@ -32,7 +31,7 @@ def run_simulation(trial_len=300, sim_len=300, target=0.0, prism=0.0, n=1):
             "trial_length": trial_len,
             "fibers_per_joint": n//4,
             "rbf_sdev": 15.0,
-            "baseline_rate": 50.0,
+            "baseline_rate": 10.0,
             }
         )
 

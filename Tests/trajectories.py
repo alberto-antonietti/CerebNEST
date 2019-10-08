@@ -124,7 +124,7 @@ def save_file(prism=0.25, duration=300, file_name="JointTorques.dat"):
 
 
 if __name__ == '__main__':
-    plot_traj()
+    # plot_traj()
 
     prism = 0.25
     duration = 300
@@ -136,9 +136,18 @@ if __name__ == '__main__':
     qdd_n, amps = normalize(qdd)
     # print(np.vstack([amps, qdd_n]))
 
-    fig, axs = plt.subplots(4)
+    # fig, axs = plt.subplots(4)
 
-    for i in range(4):
-        axs[i].plot(qdd[:, i])
+    # for i in range(4):
+    #     axs[i].plot(qdd[:, i])
+
+    # plt.show()
+
+    fig, axs = plt.subplots(3, 4, figsize=(18, 10))
+
+    for j in range(4):
+        axs[0, j].plot(q[:, j])
+        axs[1, j].plot(qd[:, j])
+        axs[2, j].plot(qdd[:, j])
 
     plt.show()
