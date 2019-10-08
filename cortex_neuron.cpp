@@ -217,6 +217,11 @@ mynest::cortex_neuron::handle( nest::SpikeEvent& e )
 
   B_.in_spikes_[ t % buf_size ] += e.get_weight() * e.get_multiplicity();
 
+  if ( t < buf_size )
+  {
+    buf_size = t + 1;  // to avoid underestimations at the beginning
+  }
+
   int spike_count = 0;
   for ( long i = 0; i < buf_size; i++ )
   {
