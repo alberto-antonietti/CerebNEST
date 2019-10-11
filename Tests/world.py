@@ -73,20 +73,109 @@ def integrate_torque(evs, ts, j_id, pop_size, pop_offset):
     return j_ts, torques, vel, pos
 
 
-n = 400
-evs, ts = run_simulation(n=n)
+def plot_integration(evs, ts, n):
+    fig, axs = plt.subplots(3, 4, figsize=(18, 10))
 
-# pylab.scatter(ts, evs, marker='.')
-# pylab.show()
+    for j in range(4):
+        j_ts, qdd, qd, q = integrate_torque(evs, ts, j, n, n)
+        print(q[-1])
+
+        axs[0, j].scatter(j_ts, qdd, marker='.')
+        axs[1, j].plot(j_ts, qd)
+        axs[2, j].plot(j_ts, q)
+
+    plt.show()
 
 
-fig, axs = plt.subplots(3, 4, figsize=(18, 10))
+def get_final_position(ts, evs, n):
+    results = [integrate_torque(evs, ts, j, n, n) for j in range(4)]
+    return np.array([q[-1] for (j_ts, qdd, qd, q) in results])
 
-for j in range(4):
-    j_ts, trq, vel, pos = integrate_torque(evs, ts, j, n, n)
 
-    axs[0, j].scatter(j_ts, trq, marker='.')
-    axs[1, j].plot(j_ts, vel)
-    axs[2, j].plot(j_ts, pos)
+def plot_multiple(trials, n):
+    fig, axs = plt.subplots(3, 4, figsize=(18, 10))
 
-plt.show()
+    final_pos = []
+
+    for i in range(trials):
+        evs, ts = run_simulation(n=n)
+        for j in range(4):
+            j_ts, qdd, qd, q = integrate_torque(evs, ts, j, n, n)
+            print(q[-1])
+            final_pos.append(get_final_position(ts, evs, n))
+
+            axs[0, j].scatter(j_ts, qdd, marker='.')
+            axs[1, j].plot(j_ts, qd)
+            axs[2, j].plot(j_ts, q)
+
+    final_pos = np.array(final_pos)
+    print(final_pos)
+    print(np.array([
+        (np.mean(final_pos[:, i]), np.var(final_pos[:, i]))
+        for i in range(4)
+    ]))
+    plt.show()
+
+
+def plot_prims():
+    n = 400
+    n_trials = 5
+    # fig, axs = plt.subplots(n_trials)
+
+    start_x = -10.0
+    final_qs = []
+
+    for i in range(n_trials):
+        evs, ts = run_simulation(n=n, prism=10.0*i)
+        j_id = 1
+        j_ts, qdd, qd, q = integrate_torque(evs, ts, j_id, n, n)
+        # axs[i].plot(q)
+        plt.plot(j_ts, q)
+        # final_xs.append(q[-1] * 10 + start_x)
+        final_qs.append(q[-1])
+
+    final_qs = np.array(final_qs)
+    final_xs = abs(start_x) * final_qs / final_qs[0] + start_x
+    print("Final xs:", final_xs)
+    print(n)
+    plt.show()
+
+
+def prism_deviations(n, n_trials, start_x, prism_values):
+    j_id = 1
+    avg_qs = []
+    std_qs = []
+
+    for prism in [0.0] + list(prism_values):
+        final_qs = []
+        for i in range(n_trials):
+            evs, ts = run_simulation(n=n, prism=float(prism))
+            j_ts, qdd, qd, q = integrate_torque(evs, ts, j_id, n, n)
+            final_qs.append(q[-1])
+
+        avg_qs.append(np.average(final_qs))
+        std_qs.append(np.std(final_qs))
+
+    avg_qs = np.array(avg_qs)
+    std_qs = np.array(std_qs)
+    final_xs = abs(start_x) * avg_qs / avg_qs[0] + start_x
+    std_xs = abs(start_x) * std_qs / avg_qs[0]
+
+    return final_xs, std_xs
+
+
+if __name__ == '__main__':
+    n = 400
+    # plot_multiple(10, n)
+    # plot_prims()
+    # xs = prism_deviations(400, -10.0, [10, 20, 30, 40])
+    xs, stds = prism_deviations(400, 5, -10.0, 10*np.arange(4) + 10)
+    print("xs:", xs)
+    print("stds:", stds)
+    plt.errorbar(np.arange(len(xs)), xs, stds)
+    # plt.plot(xs)
+    plt.show()
+
+    q_in = np.array((10.0, -10.0, -90.0, 170.0))
+    q_out = np.array((0.0, 0.0, 0.0, 0.0))
+    delta_expected = q_out - q_in
