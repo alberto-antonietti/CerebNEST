@@ -111,12 +111,8 @@ mynest::cortex_neuron::init_buffers_()
   Archiving_Node::clear_history();
 
   double time_res = nest::Time::get_resolution().get_ms();  // 0.1
-  long ticks = 50.0 / time_res;  // 50ms
   // long ticks = 100.0 / time_res;  // 100ms
-  for ( long i = 0; i < ticks; i++ )
-  {
-    B_.in_spikes_.push_back(0);
-  }
+  V_.buffer_size_ = 50.0 / time_res;
 
   B_.traj_.resize(4, std::vector<double>(P_.trial_length_));
   std::ifstream traj_file("JointTorques.dat");
@@ -160,8 +156,20 @@ mynest::cortex_neuron::update( nest::Time const& origin, const long from, const 
   assert( from < to );
 
   double time_res = nest::Time::get_resolution().get_ms();  // 0.1
+  long buf_size = V_.buffer_size_;
   long trial_ticks = (double)P_.trial_length_ / time_res;
   librandom::RngPtr rng = nest::kernel().rng_manager.get_rng( get_thread() );
+
+  double spike_count = 0;
+  long tick = origin.get_steps();
+  for ( long i = 0; i < buf_size; i++ )
+  {
+    if ( B_.in_spikes_.count(tick - i) )
+    {
+      spike_count += B_.in_spikes_[tick - i];
+    }
+  }
+  double in_rate = std::max( 0.0, 1000.0 * spike_count / (buf_size * time_res) );
 
   for ( long lag = from; lag < to; ++lag )
   {
@@ -180,7 +188,7 @@ mynest::cortex_neuron::update( nest::Time const& origin, const long from, const 
 
     if ( j_id == 1 )  // Second joint
     {
-      baseline_rate = std::max( 0.0, V_.in_rate_ );
+      baseline_rate = std::max( 0.0, in_rate );
     }
 
     double rate = baseline_rate * exp(-pow(((desired - mean) / sdev), 2 ));
@@ -201,9 +209,6 @@ mynest::cortex_neuron::update( nest::Time const& origin, const long from, const 
         set_spiketime( nest::Time::step( tick ) );
       }
     }
-
-    long buf_size = B_.in_spikes_.size();
-    B_.in_spikes_[ tick % buf_size ] = 0;
   }
 }
 
@@ -211,28 +216,14 @@ void
 mynest::cortex_neuron::handle( nest::SpikeEvent& e )
 {
   nest::Time stamp = e.get_stamp();
-  long t = stamp.get_steps();
+  long tick = stamp.get_steps();
 
-  long buf_size = B_.in_spikes_.size();
+  long buf_size = V_.buffer_size_;
 
-  B_.in_spikes_[ t % buf_size ] += e.get_weight() * e.get_multiplicity();
-
-  if ( t < buf_size )
+  double map_value = 0.0;
+  if ( B_.in_spikes_.count(tick) )
   {
-    buf_size = t + 1;  // to avoid underestimations at the beginning
+    map_value = B_.in_spikes_[tick];
   }
-
-  int spike_count = 0;
-  for ( long i = 0; i < buf_size; i++ )
-  {
-    spike_count += B_.in_spikes_[ i ];
-  }
-  double time_res = nest::Time::get_resolution().get_ms();  // 0.1
-  V_.in_rate_ = std::max( 0.0, 1000.0 * spike_count / (buf_size * time_res) );
-
-  if ( P_.to_file_ )
-  {
-    V_.out_file_ << "in_rate\t" << V_.in_rate_ << std::endl;
-  }
-  // std::cout << "Rate: " << V_.in_rate_ << std::endl;
+  B_.in_spikes_[tick] = map_value + e.get_weight() * e.get_multiplicity();
 }

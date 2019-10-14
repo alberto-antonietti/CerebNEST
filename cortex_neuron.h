@@ -43,7 +43,7 @@ private:
 
   struct Buffers_
   {
-    std::vector<double> in_spikes_;
+    std::map<long, double> in_spikes_;
     std::vector <std::vector<double> > traj_;
   };
 
@@ -66,7 +66,7 @@ private:
 
   struct Variables_
   {
-    double in_rate_;
+    long buffer_size_;
     std::vector<double> joint_scale_factors_;
     librandom::PoissonRandomDev poisson_dev_; //!< Random deviate generator
     std::ofstream out_file_; //!< OutputFile
