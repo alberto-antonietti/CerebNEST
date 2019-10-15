@@ -41,7 +41,7 @@
 #include <algorithm>
 #include <new>
 #include <vector>
-
+#include <fstream>
 
 // Includes from nestkernel:
 #include "common_synapse_properties.h"
