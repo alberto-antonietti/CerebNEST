@@ -118,7 +118,7 @@ mynest::CerebModule::init( SLIInterpreter* i )
   nest::kernel().model_manager.register_node_model< mynest::volume_transmitter_alberto >(
     "volume_transmitter_alberto" );
 
-  nest::kernel().model_manager.register_node_model< mynest::eglif_cond_alpha_multisyn >(
+  nest::kernel().model_manager.register_node_model< eglif_cond_alpha_multisyn >(
     "eglif_cond_alpha_multisyn" );
 
 
