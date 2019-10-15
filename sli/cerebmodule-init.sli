@@ -1,5 +1,5 @@
 /*
- *  albertomodule-init.sli
+ *  cerebmodule-init.sli
  *
  *  This file is part of NEST.
  *
@@ -25,4 +25,4 @@
  * Run automatically when Alberto is loaded.
  */
 
-M_DEBUG (albertomodule.sli) (Initializing SLI support for AlbertoModule.) message
+M_DEBUG (cerebmodule.sli) (Initializing SLI support for CerebModule.) message
