@@ -118,17 +118,10 @@ mynest::CerebModule::init( SLIInterpreter* i )
   nest::kernel().model_manager.register_node_model< mynest::volume_transmitter_alberto >(
     "volume_transmitter_alberto" );
 
-  nest::kernel().model_manager.register_node_model< mynest::closed_loop_neuron >(
-    "closed_loop_neuron" );
+  nest::kernel().model_manager.register_node_model< mynest::eglif_cond_alpha_multisyn >(
+    "eglif_cond_alpha_multisyn" );
 
-  nest::kernel().model_manager.register_node_model< mynest::planner_neuron >(
-    "planner_neuron" );
 
-  nest::kernel().model_manager.register_node_model< mynest::cortex_neuron >(
-    "cortex_neuron" );
-
-  nest::kernel().model_manager.register_node_model< mynest::radial_basis_function_input >(
-    "radial_basis_function_input" );
   /*
    Register a synapse type.
      Give synapse type as template argument and the name as second argument.
@@ -141,6 +134,10 @@ mynest::CerebModule::init( SLIInterpreter* i )
      even further, but limits the number of available rports. Please see
      Kunkel et al, Front Neurofinfom 8:78 (2014), Sec 3.3.2, for details.
   */
+  nest::kernel()
+    .model_manager.register_connection_model< STDPAlphaConnection< nest::
+        TargetIdentifierPtrRport > >( "stdp_synapse_alpha" );
+
   nest::kernel()
     .model_manager.register_connection_model< STDPSinExpConnection< nest::
         TargetIdentifierPtrRport > >( "stdp_synapse_sinexp" );

@@ -41,7 +41,6 @@ set( MODULE_SOURCES
     cerebmodule.h cerebmodule.cpp
     volume_transmitter_alberto.h volume_transmitter_alberto.cpp
     eglif_cond_alpha_multisyn.h eglif_cond_alpha_multisyn.cpp
-    radial_basis_function_input.h radial_basis_function_input.cpp
     stdp_connection_cosexp.h stdp_connection_cosexp.cpp
     stdp_connection_sinexp.h stdp_connection_sinexp.cpp
     stdp_connection_alpha.h stdp_connection_alpha.cpp
