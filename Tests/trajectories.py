@@ -105,7 +105,7 @@ def normalize(qdd):
     return qdd, amplitudes_norm
 
 
-def save_file(prism=0.25, duration=300, file_name="JointTorques.dat"):
+def save_file(prism=25.0, duration=300, file_name="JointTorques.dat"):
     q_in = np.array((10.0, -10.0, -90.0, 170.0))
     q_out = np.array((0.0, prism, 0.0,   0.0))
 
@@ -126,7 +126,7 @@ def save_file(prism=0.25, duration=300, file_name="JointTorques.dat"):
 if __name__ == '__main__':
     # plot_traj()
 
-    prism = 0.25
+    prism = 25.0
     duration = 300
     q_in = np.array((10.0, -10.0, -90.0, 170.0))
     q_out = np.array((0.0, prism, 0.0,   0.0))
