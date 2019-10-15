@@ -1,4 +1,4 @@
-# Alberto/CMakeLists.txt
+# Cereb/CMakeLists.txt
 #
 # This file is part of NEST.
 #
@@ -21,8 +21,7 @@ cmake_minimum_required( VERSION 2.8.12 )
 
 # This CMakeLists.txt is configured to build your external module for NEST. For
 # illustrative reasons this module is called 'my' (change SHORT_NAME to your
-# preferred module name). NEST requires you to extend the 'SLIModule' (see
-# alberto.h and mymodule.cpp as an example) and provide a module header
+# preferred module name). NEST requires you to extend the 'SLIModule' and provide a module header
 # (see MODULE_HEADER). The subsequent instructions
 #
 # The configuration requires a compiled and installed NEST; if `nest-config` is
@@ -32,21 +31,20 @@ cmake_minimum_required( VERSION 2.8.12 )
 #           https://nest.github.io/nest-simulator/extension_modules
 
 # 1) Name your module here, i.e. add later with -Dexternal-modules=my:
-set( SHORT_NAME alberto )
+set( SHORT_NAME cereb )
 
 #    the complete module name is here:
 set( MODULE_NAME ${SHORT_NAME}module )
 
 # 2) Add all your sources here
 set( MODULE_SOURCES
-    albertomodule.h albertomodule.cpp
+    cerebmodule.h cerebmodule.cpp
     volume_transmitter_alberto.h volume_transmitter_alberto.cpp
-    closed_loop_neuron.h closed_loop_neuron.cpp
-    planner_neuron.h planner_neuron.cpp
-    cortex_neuron.h cortex_neuron.cpp
+    eglif_cond_alpha_multisyn.h eglif_cond_alpha_multisyn.cpp
     radial_basis_function_input.h radial_basis_function_input.cpp
     stdp_connection_cosexp.h stdp_connection_cosexp.cpp
     stdp_connection_sinexp.h stdp_connection_sinexp.cpp
+    stdp_connection_alpha.h stdp_connection_alpha.cpp
     iSTDP.h
     Sgritta2017.h
     mynames.h mynames.cpp

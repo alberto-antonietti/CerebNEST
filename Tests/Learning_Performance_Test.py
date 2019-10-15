@@ -6,7 +6,7 @@ import os
 import errno
 import glob
 
-nest.Install("albertomodule")
+nest.Install("cerebmodule")
 
 # Cell numbers
 GR_number = 65600

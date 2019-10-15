@@ -8,7 +8,7 @@ import glob
 
 #@profile
 def main():
-    nest.Install("albertomodule")
+    nest.Install("cerebmodule")
 
     # Cell numbers
     MF_number = 100

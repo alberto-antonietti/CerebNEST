@@ -7,7 +7,7 @@ import errno
 import glob
 
 
-nest.Install("albertomodule")
+nest.Install("cerebmodule")
 
 ''' SIMULATION PROPERTIES '''
 CORES = int(sys.argv[1])

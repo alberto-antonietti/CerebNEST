@@ -1,7 +1,7 @@
 import sys
 import nest
 import numpy as np
-nest.Install("albertomodule")
+nest.Install("cerebmodule")
 
 CORES = int(sys.argv[1])
 
