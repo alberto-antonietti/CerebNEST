@@ -120,36 +120,7 @@ else
   echo "Weights with 1 and 4 Cores are different FAIL"
 fi
 
-#### CHECK EBCC CLOSED LOOP #####
-
-python3 EBCC_closed_loop.py 1 &>>TestLog.txt
-if [ $? = 0 ]; then
-  echo "EBCC_closed_loop with 1 core SUCCESS"
-else
-  echo "EBCC_closed_loop with 1 core FAIL"
-fi
-mv OutputFile.dat Output_1.dat
-mv CR.dat CR_1.dat
 python3 Remove_Empty.py &>>TestLog.txt
-
-python3 EBCC_closed_loop.py 4 &>>TestLog.txt
-if [ $? = 0 ]; then
-  echo "EBCC_closed_loop with 4 Core SUCCESS"
-else
-  echo "EBCC_closed_loop with 4 Core FAIL"
-fi
-mv OutputFile.dat Output_4.dat
-mv CR.dat CR_4.dat
-python3 Remove_Empty.py &>>TestLog.txt
-
-diff -u  Output_1.dat Output_4.dat > Diff_Output.csv
-
-if [[ -s Diff_Output.csv ]]; then
-  echo "Weights with 1 and 4 Cores are different FAIL";
-else
-  echo "Weights with 1 and 4 Cores are the same SUCCESS";
-fi
-
 
 #### CLEAN-UP THE FOLDER #####
 rm *.csv *.gdf
