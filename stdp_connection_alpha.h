@@ -204,8 +204,6 @@ private:
   // data members of each connection
   double weight_;
 
-  double vt_num_;
-
   // dopa_spikes_idx_ refers to the dopamine spike that has just been processes
   // after trigger_update_weight a pseudo dopamine spike at t_trig is stored at index 0 and
   // dopa_spike_idx_ = 0
@@ -214,6 +212,8 @@ private:
   // time of last update, which is either time of last presyn. spike or time-driven update
   double t_last_update_;
 
+  double vt_num_;
+    
   double t_lastspike_;
 };
 

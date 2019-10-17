@@ -645,8 +645,8 @@ Sgritta2017< targetidentifierT >::Sgritta2017(
   , mu_plus_( rhs.mu_plus_ )
   , mu_minus_( rhs.mu_minus_ )
   , Wmax_( rhs.Wmax_ )
-  , Wmin_( rhs.Wmin_ )
   , Kplus_( rhs.Kplus_ )
+  , Wmin_( rhs.Wmin_ )
   , t_lastspike_( rhs.t_lastspike_ )
   , p_( rhs.p_ )
 {
