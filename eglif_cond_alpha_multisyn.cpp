@@ -799,10 +799,11 @@ void eglif_cond_alpha_multisyn::update(nest::Time const &origin,
 		int lim_sup = S_.time;
 		int lim_inf = S_.time-P_.a;
 		int num_spk = 0;
-		for (int i = 1; i<spikes_times_.size(); i++){
-			if (spikes_times_[i-1]>lim_inf && spikes_times_[i-1]<lim_sup)
-				num_spk += 1;
-		}
+		// Removed to avoid warning (threshold variation in an old model version)
+		//for (int i = 1; i<spikes_times_.size(); i++){
+		//	if (spikes_times_[i-1]>lim_inf && spikes_times_[i-1]<lim_sup)
+		//		num_spk += 1;
+		//}
 	
 		float frequ = num_spk*1000/P_.a;
 		V_.V_th = P_.Vth_init + P_.b*frequ;
