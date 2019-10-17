@@ -456,7 +456,7 @@ public:
   /* Added for R2 update*/
   inline double get_R2() const {return V_.R2; }
 
-  inline double set_R2(const double v) { V_.R2 = v; }
+  inline double set_R2(const double v) {return V_.R2 = v; }
 
   inline double get_old_Vm() const { return V_.old_Vm; }
 
