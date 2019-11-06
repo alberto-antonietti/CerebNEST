@@ -91,7 +91,7 @@ def main():
         MFDCN_conn_param = {"model": 'stdp_synapse_cosexp',
                             "weight": Init_MFDCN,
                             "delay": 1.0,
-                            "vt_num": float(i)}
+                            "vt_num": i}
 
         nest.Connect([MF[i]], [DCNind], "one_to_one", MFDCN_conn_param)
 
