@@ -108,7 +108,7 @@ if PLAST1:
         PFPC_conn_param = {"model": 'stdp_synapse_sinexp',
                            "weight": Init_PFPC,
                            "delay": 1.0,
-                           "vt_num": float(n)
+                           "vt_num": n
                            }
         nest.Connect(GR, [PCi], {'rule': "fixed_indegree", 'indegree': 65600, "multapses": False, "autapses": False},
                      PFPC_conn_param)
