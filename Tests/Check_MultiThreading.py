@@ -45,7 +45,7 @@ conn_param1 = {"model":    'stdp_synapse_sinexp',
 
 nest.Connect(PRE,POST,{'rule': 'one_to_one'},conn_param1)
 A = nest.GetConnections(PRE,POST)
-nest.SetStatus(A, {"vt_num" : 0.0})
+nest.SetStatus(A, {"vt_num" : 0})
 SPIKES1 = [50.0, 100.0, 110.0, 120.0, 130.0, 210.0, 370.0, 490.0]
 SPIKES2 = [1.0, 200.0, 220.0, 230.0]
 
