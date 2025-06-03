@@ -1,5 +1,5 @@
 /*
- *  mynames.cpp
+ *  stdp_synapse.cpp
  *
  *  This file is part of NEST.
  *
@@ -19,29 +19,14 @@
  *  along with NEST.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#include "mynames.h"
 
-namespace mynest
-{
-namespace mynames
-{
-const Name first_dcn( "first_dcn" );
-const Name gain( "gain" );
-const Name num_dcn( "num_dcn" );
-const Name positive( "positive" );
-const Name protocol( "protocol" );
-const Name Tduration( "Tduration" );
-const Name sdev( "sdev" );
-const Name vt_num( "vt_num" );
+#include "stdp_synapse_sinexp.h"
 
-const Name trial_length( "trial_length" );
-const Name target( "target" );
-const Name prism_deviation( "prism_deviation" );
-const Name baseline_rate( "baseline_rate" );
-const Name gain_rate( "gain_rate" );
-const Name joint_id( "joint_id" );
-const Name fiber_id( "fiber_id" );
-const Name fibers_per_joint( "fibers_per_joint" );
-const Name rbf_sdev( "rbf_sdev" );
-}
+// Includes from nestkernel:
+#include "nest_impl.h"
+
+void
+nest::register_stdp_synapse_sinexp( const std::string& name )
+{
+  nest::register_connection_model< stdp_synapse_sinexp >( name );
 }

@@ -1,5 +1,5 @@
 /*
- *  cerebmodule-init.sli
+ *  stdp_synapse.cpp
  *
  *  This file is part of NEST.
  *
@@ -20,9 +20,13 @@
  *
  */
 
-/*
- * Initialization file for Alberto.
- * Run automatically when Alberto is loaded.
- */
+#include "stdp_synapse_alpha.h"
 
-M_DEBUG (cerebmodule.sli) (Initializing SLI support for CerebModule.) message
+// Includes from nestkernel:
+#include "nest_impl.h"
+
+void
+nest::register_stdp_synapse_alpha( const std::string& name )
+{
+  nest::register_connection_model< stdp_synapse_alpha >( name );
+}
