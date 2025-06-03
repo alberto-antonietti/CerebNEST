@@ -54,7 +54,7 @@ set( MODULE_SOURCES
       eglif_cond_alpha_multisyn.cpp eglif_cond_alpha_multisyn.h
 
       tracking_neuron_nestml.cpp tracking_neuron_nestml.h
-      cerebellar_module.cpp cerebellar_module.h
+      cerebellar_module.cpp
       basic_neuron_nestml.cpp basic_neuron_nestml.h
       diff_neuron_nestml.cpp diff_neuron_nestml.h
       rb_neuron_nestml.cpp rb_neuron_nestml.h
